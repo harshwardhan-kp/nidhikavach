@@ -2,7 +2,7 @@
 
 **Every deposit, released right.** A secure AICTE portal that follows each security deposit and Fixed Deposit Receipt (FDR) from upload to discharge: bank-confirmed, deadline-aware and fully auditable.
 
-Smart India Hackathon 2026 · Problem Statement **26265** (AICTE Regulation Bureau, *Streamline of Security Deposit / FDR Portal*) · Theme: Smart Automation · Team **AIT_G_SPARK**, Army Institute of Technology, Pune.
+Smart India Hackathon 2026 · Problem Statement **SIH26265** (AICTE Regulation Bureau, *Streamline of Security Deposit / FDR Portal*) · Theme: Smart Automation · Team **AIT_G_SPARK**, Army Institute of Technology, Pune.
 
 > Status: **prototype in progress.** This repository currently holds the project landing page, the idea deck and the concept film. Application code will land here as the prototype is built.
 

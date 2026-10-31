@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nidhikavach — every deposit, released right</title>
+<meta name="description" content="NidhiKavach: a secure AICTE portal for security deposits and FDRs — bank-confirmed, deadline-aware, fully auditable. SIH 2026 · PS 26265 · Team AIT_G_SPARK.">
+<meta property="og:title" content="nidhikavach — every deposit, released right">
+<meta property="og:description" content="Security deposit & FDR lifecycle portal for AICTE. SIH 2026 · PS 26265.">
+<meta property="og:image" content="/assets/poster.jpg">
+<link rel="icon" href="/assets/logo.png">
+<style>
+@font-face{font-family:S;src:url(/assets/schibsted-grotesk-latin-400-normal.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:S;src:url(/assets/schibsted-grotesk-latin-600-normal.woff2) format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:M;src:url(/assets/geist-mono-latin-400-normal.woff2) format('woff2');font-display:swap}
+@font-face{font-family:I;src:url(/assets/instrument-serif-latin-400-normal.woff2) format('woff2');font-display:swap}
+@font-face{font-family:I;src:url(/assets/instrument-serif-latin-400-italic.woff2) format('woff2');font-style:italic;font-display:swap}
+:root{--bg:#EEEEEE;--ink:#1C1C1C;--txt:#5E5E5E;--mut:#8C8C8C;--line:#D9D9D7;--red:#E73A3A}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:S,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.mono{font-family:M,ui-monospace,monospace}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+nav{position:sticky;top:0;z-index:10;background:rgba(238,238,238,.85);backdrop-filter:blur(10px)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;letter-spacing:-.4px}
+.brand img{height:30px}
+.brand small{font-family:M;font-weight:400;font-size:12px;color:var(--mut);letter-spacing:0}
+nav .links{display:flex;gap:22px;font-family:M;font-size:13px;color:var(--txt)}
+nav .links a:hover{color:var(--ink)}
+header{text-align:center;padding:84px 0 40px}
+h1{font-family:I,serif;font-weight:400;font-size:clamp(44px,7vw,84px);line-height:1;letter-spacing:-1px}
+h1 i,h2 i{font-style:italic}
+.sub{font-size:18px;color:var(--txt);max-width:620px;margin:20px auto 0;line-height:1.5}
+.tag{display:inline-block;margin-top:28px;border:1px solid var(--red);color:var(--red);border-radius:40px;padding:10px 22px;font-family:M;font-size:14px}
+.cta{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.btn{font-family:M;font-size:14px;padding:13px 22px;border-radius:10px;background:#E2E2E0}
+.btn.dark{background:#2B2B2B;color:#fff}
+.btn:hover{opacity:.85}
+.shot{position:relative;margin:48px auto 0;max-width:980px}
+.shot img{width:100%;display:block;border-radius:14px}
+.an{position:absolute;font-family:M;font-size:12px;color:#4A4A4A;line-height:1.45}
+.an:before{content:'';display:inline-block;width:7px;height:7px;background:var(--red);margin-right:8px;vertical-align:1px}
+section{padding:96px 0;border-top:1px solid var(--line)}
+.kick{font-family:M;font-size:13px;color:var(--txt);display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.kick:before{content:'';width:7px;height:7px;background:var(--red)}
+h2{font-family:I,serif;font-weight:400;font-size:clamp(34px,4.5vw,52px);line-height:1.05;letter-spacing:-.5px;max-width:760px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:44px;border-top:1px solid var(--line)}
+.grid3>div{padding:26px 26px 0 0}
+.grid3>div+div{border-left:1px dashed #C9C9C7;padding-left:26px}
+.grid3 b{font-family:I,serif;font-weight:400;font-size:30px;display:block;line-height:1}
+.grid3 p{color:var(--txt);margin-top:10px;line-height:1.5;font-size:15px}
+.grid3 .src{font-family:M;font-size:11px;color:var(--mut);margin-top:8px}
+video{width:100%;border-radius:14px;display:block;background:#0E0E0E;margin-top:36px}
+.steps{display:grid;grid-template-columns:repeat(6,1fr);margin-top:40px;text-align:center;position:relative}
+.steps:before{content:'';position:absolute;left:8%;right:8%;top:30px;border-top:1px dashed #BDBDBB}
+.st .c{width:60px;height:60px;border-radius:50%;border:1px solid #CFCFCD;background:var(--bg);margin:0 auto;display:grid;place-items:center;position:relative;font-family:M;font-size:13px}
+.st b{display:block;margin-top:12px;font-weight:600}
+.st span{font-family:M;font-size:11px;color:var(--mut)}
+footer{border-top:1px solid var(--line);padding:40px 0 56px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+footer .mono{font-size:12px;color:var(--mut)}
+@media(max-width:760px){nav .links{display:none}.grid3{grid-template-columns:1fr}.grid3>div+div{border-left:0;padding-left:0}.steps{grid-template-columns:repeat(3,1fr);row-gap:28px}.steps:before{display:none}.an{display:none}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/logo.png" alt="">nidhikavach <small>[sih 2026 · ps 26265]</small></a>
+  <div class="links"><a href="#problem">problem</a><a href="#how">how it works</a><a href="#film">film</a><a href="/docs/NidhiKavach_SIH2026_PS26265.pdf">deck</a><a href="https://github.com/harshwardhan-kp/nidhikavach">github</a></div>
+</div></nav>
+
+<header class="wrap">
+  <h1>every deposit,<br>released <i>right</i></h1>
+  <p class="sub">A secure AICTE portal that follows each security deposit and FDR from upload to discharge — bank-confirmed, deadline-aware, fully auditable.</p>
+  <div class="tag">[prototype in progress · sih 2026]</div>
+  <div class="cta"><a class="btn dark" href="#film">[watch the film]</a><a class="btn" href="/docs/NidhiKavach_SIH2026_PS26265.pdf">[read the deck]</a><a class="btn" href="https://github.com/harshwardhan-kp/nidhikavach">[github]</a></div>
+  <div class="shot">
+    <img src="/assets/dashboard.png" alt="NidhiKavach officer dashboard concept">
+  </div>
+</header>
+
+<section id="problem"><div class="wrap">
+  <div class="kick">the problem</div>
+  <h2>crores parked as deposits, tracked on <i>paper</i></h2>
+  <div class="grid3">
+    <div><b>₹116.84 cr</b><p>in fake FDRs found at a single civic body.</p><div class="src">[chandigarh mc · mar 2026]</div></div>
+    <div><b>₹35 lakh</b><p>maximum security deposit per programme, held by AICTE for 10 years.</p><div class="src">[aicte aph 2024-27, cl. 1.12]</div></div>
+    <div><b>3 desks</b><p>must each clear a single deposit release today.</p><div class="src">[aicte aph 2024-27, cl. 6.46]</div></div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <div class="kick">how it works</div>
+  <h2>three sources, one <i>truth</i></h2>
+  <p class="sub" style="margin:18px 0 0;text-align:left">Every FDR field is checked three ways — what the institution declared, what the scan shows, what the bank confirms — and rolled into one trust score. Maker ≠ checker approvals and a hash-chained audit trail make fraud visible, not just recorded.</p>
+  <div class="steps">
+    <div class="st"><div class="c">01</div><b>submit</b><span>[institution]</span></div>
+    <div class="st"><div class="c">02</div><b>scan</b><span>[doc-ai reads]</span></div>
+    <div class="st"><div class="c">03</div><b>match</b><span>[3 sources]</span></div>
+    <div class="st"><div class="c">04</div><b>verify</b><span>[maker + checker]</span></div>
+    <div class="st"><div class="c">05</div><b>watch</b><span>[t-90 → t-7]</span></div>
+    <div class="st"><div class="c">06</div><b>release</b><span>[esigned]</span></div>
+  </div>
+</div></section>
+
+<section id="film"><div class="wrap">
+  <div class="kick">concept film</div>
+  <h2>see the <i>idea</i> in 76 seconds</h2>
+  <video controls preload="metadata" poster="/assets/poster.jpg" playsinline>
+    <source src="/assets/nidhikavach_film.mp4" type="video/mp4">
+  </video>
+</div></section>
+
+<footer><div class="wrap">
+  <a class="brand" href="/"><img src="/assets/logo.png" alt="">nidhikavach</a>
+  <div class="mono">[team ait_g_spark · army institute of technology, pune · smart india hackathon 2026]</div>
+</div></footer>
+</body>
+</html>

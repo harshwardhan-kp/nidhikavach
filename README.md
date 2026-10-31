@@ -25,3 +25,8 @@ Next.js · React · TypeScript · Tailwind CSS · NestJS · Temporal · FastAPI 
 | `index.html` | Landing page (deployed on Vercel) |
 | `docs/NidhiKavach_SIH2026_PS26265.pdf` | SIH idea deck |
 | `assets/nidhikavach_film.mp4` | 76-second concept film |
+
+## Links
+
+- Live site: https://nidhikavach.vercel.app
+- Demo video folder: https://drive.google.com/drive/folders/1j3dU2e2X0FqaFsvp0iVqWVg2KX_jNwlF?usp=sharing

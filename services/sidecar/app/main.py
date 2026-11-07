@@ -13,10 +13,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-from . import specimen, storage, tokens
+from . import mockbank, specimen, storage, tamper, tokens
 from .config import settings
 
-app = FastAPI(title="NidhiKavach sidecar", version="0.2.0", docs_url=None, redoc_url=None)
+app = FastAPI(title="NidhiKavach sidecar", version="0.3.0", docs_url=None, redoc_url=None)
+mockbank.init()
 
 app.add_middleware(
     CORSMiddleware,
@@ -105,3 +106,30 @@ def render_specimen(req: SpecimenRequest) -> dict:
     if existing.get("exists"):
         return existing
     return storage.write_atomic(req.key, specimen.render(req.spec))
+
+
+# ----------------------------------------------------------------- tamper --
+
+
+class TamperRequest(BaseModel):
+    key: str
+
+
+@app.post("/v1/tamper/analyze", dependencies=[Depends(require_key)])
+def tamper_analyze(req: TamperRequest) -> dict:
+    p = storage.path_for(req.key)
+    if not p.exists():
+        raise HTTPException(status_code=404, detail="not found")
+    data = p.read_bytes()
+    mime = storage.sniff(data[:16]) or "application/octet-stream"
+    result = tamper.analyse(data, mime)
+    heat_key = None
+    if result["heatmap"]:
+        heat_key = f"derived/ela-{p.stem}.jpg"
+        storage.write_atomic(heat_key, result["heatmap"])
+    return {"score": result["score"], "findings": result["findings"], "heatmapKey": heat_key, "mime": mime}
+
+
+# ------------------------------------------------------------ mock bank --
+
+app.include_router(mockbank.router, dependencies=[Depends(require_key)])

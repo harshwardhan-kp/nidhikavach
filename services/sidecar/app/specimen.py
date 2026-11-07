@@ -138,16 +138,11 @@ def render(spec: dict) -> bytes:
     d.rectangle(box, outline=ink, width=2)
     d.text((box[0] + 18, box[1] + 14), "PRINCIPAL AMOUNT", font=sans(18, True), fill=(80, 80, 95))
     amount_xy = (box[0] + 18, box[1] + 56)
-    amount_text = f"Rs. {inr(amount)}.00"
-    if variant == "forged":
-        # A pasted patch: slightly different paper tone and a different typeface.
-        f = sans(25, True)
-        tw = d.textlength(amount_text, font=f)
-        d.rectangle([amount_xy[0] - 6, amount_xy[1] - 6, amount_xy[0] + tw + 8, amount_xy[1] + 40], fill=(252, 251, 248))
-        d.text(amount_xy, amount_text, font=f, fill=(18, 18, 18))
-    else:
-        d.text(amount_xy, amount_text, font=mono(25), fill=ink)
-    words = f"Rupees {rupees_in_words(amount)} Only"
+    # A forged receipt starts life as a genuine one for the true (smaller) amount;
+    # the inflated figure is pasted on afterwards (see the end of render()).
+    printed = int(spec.get("originalAmountRupees") or amount // 10) if variant == "forged" else amount
+    d.text(amount_xy, f"Rs. {inr(printed)}.00", font=mono(25), fill=ink)
+    words = f"Rupees {rupees_in_words(printed)} Only"
     wy = box[1] + 110
     line = ""
     for word in words.split():
@@ -193,8 +188,24 @@ def render(spec: dict) -> bytes:
     noise = Image.effect_noise((W // 2, H // 2), 9).convert("RGB").resize((W, H))
     img = Image.blend(img, noise, 0.035)
 
+    if variant == "forged":
+        # The "original scan" as the bank issued it...
+        first = io.BytesIO()
+        img.save(first, format="JPEG", quality=58)
+        img = Image.open(io.BytesIO(first.getvalue())).convert("RGB")
+        # ...then the amount is covered with a clean patch and retyped in a slightly different face.
+        d = ImageDraw.Draw(img)
+        f = sans(25, True)
+        text = f"Rs. {inr(amount)}.00"
+        tw = d.textlength(text, font=f)
+        d.rectangle([amount_xy[0] - 6, amount_xy[1] - 6, amount_xy[0] + max(tw, 250) + 8, amount_xy[1] + 40], fill=(249, 246, 239))
+        d.text(amount_xy, text, font=f, fill=(18, 18, 18))
+        words_top = box[1] + 106
+        d.rectangle([box[0] + 14, words_top, box[2] - 10, words_top + 58], fill=(249, 246, 239))
+        d.text((box[0] + 18, words_top + 4), f"Rupees {rupees_in_words(amount)} Only"[:34], font=serif(19), fill=ink)
+
     out = io.BytesIO()
-    img.save(out, format="JPEG", quality=84)
+    img.save(out, format="JPEG", quality=88)
     return out.getvalue()
 
 

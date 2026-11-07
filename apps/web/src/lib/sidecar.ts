@@ -46,3 +46,65 @@ export const renderSpecimen = (key: string, spec: unknown) =>
     method: "POST",
     body: JSON.stringify({ key, spec }),
   });
+
+export type TamperFinding = { kind: string; detail: string; weight: number; box: [number, number, number, number] | null };
+
+export const tamperScan = (key: string) =>
+  call<{ score: number; findings: TamperFinding[]; heatmapKey: string | null; mime: string }>("/v1/tamper/analyze", {
+    method: "POST",
+    body: JSON.stringify({ key }),
+  });
+
+/* ----------------------------------------- simulated bank rails (mock) -- */
+
+export type TermDeposit = {
+  type: "TERM_DEPOSIT";
+  linkedAccRef: string;
+  maskedAccNumber: string;
+  profile: { holders: { holder: { name: string }[] } };
+  summary: {
+    ifsc: string;
+    openingDate: string;
+    maturityDate: string;
+    principalAmount: number;
+    maturityAmount: number;
+    interestRate: number;
+    status: "ACTIVE" | "CLOSED" | "MATURED";
+    closedOn: string | null;
+    autoRenewal: boolean;
+    lien: { marked: boolean; inFavourOf: string | null };
+  };
+};
+
+export class SidecarError extends Error {
+  constructor(public status: number, public detail: unknown) {
+    super(`sidecar ${status}`);
+  }
+}
+
+async function bankCall<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${env.SIDECAR_URL}${path}`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.SIDECAR_API_KEY}`, "content-type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new SidecarError(res.status, (json as { detail?: unknown }).detail ?? json);
+  return json as T;
+}
+
+export const bank = {
+  consent: (ifsc: string, accountNo: string) =>
+    bankCall<{ consentId: string; status: string; expiresAt: string }>("/v1/bank/aa/consent", { ifsc, accountNo }),
+  fetch: (consentId: string) => bankCall<{ sessionId: string; found: boolean; fi?: TermDeposit; fipMessage?: string }>("/v1/bank/aa/fetch", { consentId }),
+  nesl: (ifsc: string, instrumentNo: string) =>
+    bankCall<{ found: boolean; instrument?: TermDeposit; message?: string }>("/v1/bank/nesl/lookup", { ifsc, instrumentNo }),
+  issue: (d: Record<string, unknown>) => bankCall<{ ok: boolean }>("/v1/bank/admin/issue", d),
+  recent: async () => {
+    const res = await fetch(`${env.SIDECAR_URL}/v1/bank/admin/recent?limit=15`, { headers: { authorization: `Bearer ${env.SIDECAR_API_KEY}` }, cache: "no-store" });
+    return (await res.json()) as { total: number; recent: Record<string, string | number | null>[] };
+  },
+};
+
+export const AA_RAIL = new Set(["SBIN", "HDFC", "ICIC", "UTIB", "KKBK", "BARB", "PUNB", "CNRB", "UBIN"]);

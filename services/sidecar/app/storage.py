@@ -9,7 +9,7 @@ from fastapi import HTTPException
 
 from .config import settings
 
-KEY_RE = re.compile(r"^(uploads|specimen|orders)/[A-Za-z0-9._-]{1,120}$")
+KEY_RE = re.compile(r"^(uploads|specimen|orders|derived)/[A-Za-z0-9._-]{1,120}$")
 
 MAGIC = {
     "application/pdf": [b"%PDF-"],

@@ -34,7 +34,14 @@ export type GenContext = {
   institutionCount?: number;
 };
 
+/** What the (simulated) bank's core banking holds for each deposit. */
+export type BankDeposit = {
+  ifsc: string; accountNo: string; holder: string; principal: number; openingDate: string; maturityDate: string;
+  rate: number; status: "ACTIVE" | "CLOSED" | "MATURED"; closedOn: string | null; lienHolder: string; autoRenew: boolean; product: string;
+};
+
 export type Dataset = {
+  bankDeposits: BankDeposit[];
   institutions: InstitutionRow[];
   instruments: InstrumentRow[];
   fields: FieldRow[];
@@ -160,7 +167,7 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
     return rng.pick(list);
   };
 
-  const ds: Dataset = { institutions: [], instruments: [], fields: [], documents: [], verifications: [], discrepancies: [], releases: [], approvals: [] };
+  const ds: Dataset = { bankDeposits: [], institutions: [], instruments: [], fields: [], documents: [], verifications: [], discrepancies: [], releases: [], approvals: [] };
   const usedNames = new Set<string>();
   const usedCase = new Set<string>();
   const caseCounters = new Map<string, number>();
@@ -294,7 +301,8 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
   const sbiNagpur = BRANCHES.find((b) => b.bankCode === "SBIN" && b.state.toUpperCase() === "MAHARASHTRA") ?? branchIn("Maharashtra");
   base(demo, { caseNo: "FDR-26-04187", programme: "Diploma Computer Engineering", branch: sbiNagpur, rupees: 1000000, issueDate: addYears(addDays(today, 45), -3), maturityDate: addDays(today, 45) });
   base(demo, { caseNo: "FDR-21-01022", programme: "Diploma Mechanical Engineering", rupees: 2500000, issueDate: "2021-06-14", maturityDate: "2031-06-14" });
-  base(demo, { caseNo: "FDR-26-05310", programme: "Diploma Electrical Engineering", rupees: 500000, issueDate: addDays(today, -9), maturityDate: addYears(addDays(today, -9), 5), record: "under_scrutiny", verification: "unverified" });
+  // Left unread on purpose: the pitch runs Doc-AI, the tamper scan and the bank check on it live.
+  base(demo, { caseNo: "FDR-26-05310", programme: "Diploma Electrical Engineering", rupees: 500000, issueDate: addDays(today, -9), maturityDate: addYears(addDays(today, -9), 5), record: "under_scrutiny", verification: "unverified", hasScan: false });
 
   const pune = showcaseInst("Sahyadri Ridge Institute of Technology, Pune", "Pune", "Maharashtra", "engineering");
   base(pune, { caseNo: "FDR-26-03952", rupees: 2500000, issueDate: addDays(today, -120), maturityDate: addYears(addDays(today, -120), 10), verification: "mismatch", anomaly: "amount_mismatch", discrepancyStatus: "open" });
@@ -481,13 +489,31 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
           instrumentNo,
           depositor: l.inst.name,
           amountRupees: l.rupees,
-          // A forged scan shows the declared amount; the bank knows the real one.
+          // A forged scan shows the declared amount pasted over the real one the bank knows.
+          originalAmountRupees: variant === "forged" ? bankAmount : l.rupees,
           issueDate: l.issueDate,
           maturityDate: l.maturityDate,
           lien: l.anomaly === "lien_other" ? lienOther : LIEN_TEXT,
           autoRenew: l.autoRenew,
           tenureYears: Math.round(daysBetween(l.issueDate, l.maturityDate) / 365),
         },
+      });
+    }
+
+    if (l.anomaly !== "no_bank_record") {
+      ds.bankDeposits.push({
+        ifsc: l.branch.ifsc,
+        accountNo: instrumentNo,
+        holder: l.inst.name,
+        principal: bankAmount,
+        openingDate: l.issueDate,
+        maturityDate: l.maturityDate,
+        rate: Math.round((6.25 + rng.next() * 1.25) * 100) / 100,
+        status: l.anomaly === "premature_closure" ? "CLOSED" : l.historical ? "MATURED" : "ACTIVE",
+        closedOn: l.anomaly === "premature_closure" ? bankMaturity : null,
+        lienHolder: l.anomaly === "lien_other" ? lienOther : LIEN_TEXT,
+        autoRenew: l.autoRenew,
+        product: l.type === "efdr" ? "EFDR" : l.type === "bg" ? "BG" : "FD",
       });
     }
 

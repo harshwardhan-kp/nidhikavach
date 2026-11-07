@@ -25,6 +25,8 @@ export type StructuredCall<T extends z.ZodType> = {
   instrumentId?: string | null;
   /** Reuse an earlier identical answer (same feature, model and input). Default true. */
   cache?: boolean;
+  /** Reasoning effort for reasoning models; "low" keeps interactive calls fast. */
+  effort?: "low" | "medium" | "high";
 };
 
 /**
@@ -57,6 +59,7 @@ export async function structured<T extends z.ZodType>(call: StructuredCall<T>): 
       instructions: call.instructions,
       input: call.input,
       text: { format: zodTextFormat(call.schema, call.schemaName) },
+      ...(call.effort ? { reasoning: { effort: call.effort } } : {}),
     });
     const data = res.output_parsed as z.infer<T> | null;
     if (!data) throw new Error("model returned no structured output");

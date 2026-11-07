@@ -148,6 +148,17 @@ async function seedFull(db: DB) {
       from (select * from instruments order by submitted_at nulls last, case_no) s
     ) x`);
   await db.execute(sql`analyze`);
+
+  // The simulated bank's core-banking store lives in the sidecar.
+  for (let i = 0; i < ds.bankDeposits.length; i += 2000) {
+    const res = await fetch(`${process.env.SIDECAR_URL}/v1/bank/admin/load`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${process.env.SIDECAR_API_KEY}`, "content-type": "application/json" },
+      body: JSON.stringify({ deposits: ds.bankDeposits.slice(i, i + 2000), replace: i === 0 }),
+    });
+    if (!res.ok) throw new Error(`mock bank load failed: ${res.status} ${await res.text()}`);
+    if (i + 2000 >= ds.bankDeposits.length) console.log("mock bank:", await res.json());
+  }
   console.log(`full dataset inserted in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 }
 

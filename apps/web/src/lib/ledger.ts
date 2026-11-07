@@ -1,10 +1,9 @@
 import "server-only";
 import { desc, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import type { SessionUser } from "./auth/session";
 
 export type LedgerEntry = {
-  actor: Pick<SessionUser, "id" | "primaryRole"> | null;
+  actor: { id: string; primaryRole: string } | null;
   action: string; // e.g. "instrument.submitted", "release.approved"
   entity: string; // e.g. "instrument"
   entityId?: string | null;

@@ -15,7 +15,8 @@
     "db:lifecycle": "node --conditions=react-server --import tsx --env-file=.env.local scripts/lifecycle.mts",
     "db:reseed": "npm run db:seed -- --reset --full && npm run db:assets && npm run db:rules && npm run db:lifecycle -- --silent",
     "db:assets": "node --conditions=react-server --import tsx --env-file=.env.local scripts/seed-assets.mts",
-    "db:rules": "node --conditions=react-server --import tsx --env-file=.env.local scripts/rules-index.mts"
+    "db:rules": "node --conditions=react-server --import tsx --env-file=.env.local scripts/rules-index.mts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
@@ -38,6 +39,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^22.20.5",
     "@types/papaparse": "^5.5.2",

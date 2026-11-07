@@ -12,3 +12,6 @@ __pycache__/
 coverage/
 playwright-report/
 test-results/
+# Playwright
+apps/web/test-results/
+apps/web/playwright-report/

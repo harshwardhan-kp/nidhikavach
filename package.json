@@ -1,7 +1,9 @@
 {
   "name": "nidhikavach",
   "private": true,
-  "workspaces": ["apps/*"],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev": "npm run dev -w web",
     "build": "npm run build -w web",
@@ -10,7 +12,11 @@
     "test": "npm run test -w web",
     "db:generate": "npm run db:generate -w web",
     "db:migrate": "npm run db:migrate -w web",
-    "db:seed": "npm run db:seed -w web"
+    "db:seed": "npm run db:seed -w web",
+    "db:reseed": "npm run db:reseed -w web",
+    "e2e": "npm run e2e -w web"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  }
 }

@@ -21,6 +21,7 @@ import { ActionsPanel, type PendingLetter } from "./actions-panel";
 import { CaseBrief, DraftPanel } from "./assist";
 import { AutoRefresh } from "./auto-refresh";
 import { DiscrepancyControls } from "./discrepancy-item";
+import { ReleaseSection } from "./release-section";
 import { RiskLine, RiskLineSkeleton } from "./risk-line";
 import { type ScanBox, ScanViewer } from "./scan-viewer";
 
@@ -411,39 +412,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
             )}
           </Section>
 
-          {c.releases.length ? (
-            <Section title="release / refund">
-              {c.releases.map((r) => (
-                <div key={r.id} className="text-[13px]">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Pill tone="dark">{r.kind}</Pill>
-                    <LanePill value={r.state} />
-                    <span className="tag">requested {formatDateTime(r.requestedAt)}</span>
-                  </div>
-                  <p className="mt-1.5 text-txt">{r.reason}</p>
-                  <ol className="mt-3 grid gap-2 sm:grid-cols-3">
-                    {(["recommend", "check", "approve"] as const).map((step) => {
-                      const a = c.approvals.find((x) => x.a.releaseRequestId === r.id && x.a.step === step);
-                      return (
-                        <li key={step} className={cn("rounded-[10px] border px-3 py-2.5", a ? "border-green/40 bg-green-soft/40" : "border-dashed border-line")}>
-                          <div className="tag">[{step === "recommend" ? "maker" : step === "check" ? "checker" : "authority"}]</div>
-                          <div className="mt-1 font-semibold">{step}</div>
-                          {a ? (
-                            <>
-                              <div className="text-[12px]">{a.actor}</div>
-                              <div className="tag">{formatDateTime(a.a.createdAt)}</div>
-                            </>
-                          ) : (
-                            <div className="tag">pending</div>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </div>
-              ))}
-            </Section>
-          ) : null}
+          <ReleaseSection c={c} user={user} />
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">

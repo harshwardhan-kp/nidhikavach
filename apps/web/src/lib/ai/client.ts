@@ -92,3 +92,10 @@ export async function structured<T extends z.ZodType>(call: StructuredCall<T>): 
     throw e;
   }
 }
+
+/** Embeddings for retrieval (A7). One call for a batch of texts. */
+export async function embed(texts: string[]): Promise<number[][]> {
+  const { MODELS } = await import("./models");
+  const res = await openai().embeddings.create({ model: MODELS.embedding, input: texts });
+  return res.data.sort((a, b) => a.index - b.index).map((d) => d.embedding);
+}

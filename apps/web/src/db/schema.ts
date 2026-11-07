@@ -23,6 +23,7 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  vector,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
@@ -440,6 +441,22 @@ export const signingKeys = pgTable("signing_keys", {
     .references(() => users.id),
   publicKey: text("public_key").notNull(),
   createdAt: createdAt(),
+});
+
+/* ------------------------------------------------------- handbook notes -- */
+
+/**
+ * A7 knowledge base: short notes paraphrasing the AICTE Approval Process
+ * Handbook (clause-referenced), embedded for retrieval. Paraphrased, not the
+ * handbook text: the clause reference is what officers check.
+ */
+export const ruleNotes = pgTable("rule_notes", {
+  id: text("id").primaryKey(), // e.g. "aph-6.46-docs"
+  clause: text("clause").notNull(), // e.g. "APH 2024-27 cl. 6.46(a)"
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  embedding: vector("embedding", { dimensions: 1536 }),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 
 /* -------------------------------------------------- reminders & messages -- */

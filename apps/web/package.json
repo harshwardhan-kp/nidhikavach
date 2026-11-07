@@ -13,7 +13,9 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed/index.ts",
     "db:lifecycle": "node --conditions=react-server --import tsx --env-file=.env.local scripts/lifecycle.mts",
-    "db:reseed": "npm run db:seed -- --reset --full && npm run db:lifecycle -- --silent"
+    "db:reseed": "npm run db:seed -- --reset --full && npm run db:assets && npm run db:rules && npm run db:lifecycle -- --silent",
+    "db:assets": "node --conditions=react-server --import tsx --env-file=.env.local scripts/seed-assets.mts",
+    "db:rules": "node --conditions=react-server --import tsx --env-file=.env.local scripts/rules-index.mts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
@@ -25,7 +27,9 @@
     "next": "16.4.5",
     "openai": "^7.53.0",
     "papaparse": "^5.7.0",
+    "pdf-lib": "^1.17.1",
     "postgres": "^4.1.0",
+    "qrcode": "^1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "read-excel-file": "^9.3.14",
@@ -37,6 +41,7 @@
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^22.20.5",
     "@types/papaparse": "^5.5.2",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^18.0.9",

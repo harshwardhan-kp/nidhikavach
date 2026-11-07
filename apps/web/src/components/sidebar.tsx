@@ -3,6 +3,7 @@
 import {
   BarChart3,
   Bell,
+  BookOpen,
   Mail,
   Clock,
   FolderOpen,
@@ -34,6 +35,7 @@ const ICONS: Record<string, LucideIcon> = {
   upload: Upload,
   sheet: FileSpreadsheet,
   bell: Bell,
+  book: BookOpen,
   mail: Mail,
 };
 

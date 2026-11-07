@@ -9,6 +9,7 @@
 import { FIELDS, type FieldKey, LIEN_TEXT, matchField } from "../../lib/rules/fields";
 import { addDays, daysBetween, renewalLane, validityLane, type RenewalStatus } from "../../lib/rules/lanes";
 import { nextAction } from "../../lib/rules/next-action";
+import { holdEnds } from "../../lib/rules/release";
 import { computeTrust, type FieldInput } from "../../lib/rules/trust";
 import type * as S from "../schema";
 import branchesJson from "./ifsc-sample.json";
@@ -16,6 +17,9 @@ import { makeRng, type Rng } from "./rng";
 
 type Branch = { ifsc: string; bank: string; bankCode: string; branch: string; city: string; district: string; state: string; address: string };
 const BRANCHES = branchesJson as Branch[];
+
+/** Storage key of the shared synthetic release dossier (uploaded by scripts/seed-assets.mts). */
+export const SEED_DOSSIER_KEY = "uploads/00000000-0000-4000-8000-00000000d055.pdf";
 
 export type InstitutionRow = typeof S.institutions.$inferInsert & { id: string };
 export type InstrumentRow = typeof S.instruments.$inferInsert & { id: string; caseNo: string };
@@ -266,7 +270,7 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
       if (l.anomaly !== "none" && l.anomaly !== "low_quality") {
         l.discrepancyStatus = rng.weighted([["open", 50], ["awaiting_institution", 35], ["resolved_pending_check", 15]] as const);
       }
-      if (l.anomaly === "none" && l.verification === "bank_confirmed" && regionCode.get(l.inst.regionId) === "WRO" && rng.chance(0.012)) {
+      if (l.anomaly === "none" && l.verification === "bank_confirmed" && regionCode.get(l.inst.regionId) === "WRO" && rng.chance(0.012) && holdEnds(l.issueDate) <= today) {
         const stage = rng.weighted([["requested", 40], ["recommended", 30], ["checked", 30]] as const);
         const req = addDays(today, -rng.int(stage === "requested" ? 1 : 4, 9));
         l.release = stage;
@@ -564,14 +568,32 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
 
     if (l.releaseStage) {
       const rid = rng.uuid();
+      // The release dossier (request letter, Affidavit 6, FDR copy, LoA): one shared synthetic PDF, uploaded by scripts/seed-assets.mts.
+      const dossierId = rng.uuid();
+      ds.documents.push({
+        id: dossierId,
+        instrumentId: id,
+        kind: "supporting",
+        fileKey: SEED_DOSSIER_KEY,
+        filename: `${l.caseNo}_release_dossier.pdf`,
+        mime: "application/pdf",
+        sizeBytes: 0,
+        sha256: "",
+        uploadedBy: l.inst.id === demo.id ? ctx.users.institution : null,
+        uploadedAt: at(l.releaseStage.requestedOn),
+        extractionStatus: "skipped",
+        tamperStatus: "skipped",
+        synthetic: true,
+      });
       ds.releases.push({
         id: rid,
         instrumentId: id,
         kind: "release",
-        reason: "Programme closed with AICTE approval; hold period complete.",
+        reason: "The ten-year hold is complete and the programme continues; we request release of the security deposit.",
         state: l.release as never,
         requestedBy: l.inst.id === demo.id ? ctx.users.institution : null,
         requestedAt: at(l.releaseStage.requestedOn),
+        conditions: { documentIds: [dossierId], ...(l.releaseStage.recommendedOn ? { attested: { cell_clearances: true, no_dues_or_penalty: true } } : {}) },
       });
       if (l.releaseStage.recommendedOn)
         ds.approvals.push({ releaseRequestId: rid, step: "recommend", actorId: ctx.users.maker, decision: "approve", comment: "Conditions met; bank confirms the deposit is unencumbered.", createdAt: at(l.releaseStage.recommendedOn, 12) });

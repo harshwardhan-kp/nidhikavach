@@ -25,7 +25,8 @@ export function nextAction(i: NextActionInput): NextAction {
   if (i.releaseStatus === "requested") return { text: "Scrutinise the release request and recommend", role: "maker", due: soon(5) };
   if (i.releaseStatus === "recommended") return { text: "Check the release recommendation", role: "checker", due: soon(3) };
   if (i.releaseStatus === "checked") return { text: "Decide the release and eSign the order", role: "authority", due: soon(3) };
-  if (["approved", "released", "refunded"].includes(i.releaseStatus)) return null;
+  if (i.releaseStatus === "approved") return { text: "Record the bank's removal of the lien", role: "maker", due: soon(7) };
+  if (["released", "refunded"].includes(i.releaseStatus)) return null;
   const awaitingCheck = i.discrepanciesAwaitingCheck ?? 0;
   if (i.openDiscrepancies > awaitingCheck) return { text: "Resolve the open discrepancy", role: "maker", due: soon(7) };
   if (awaitingCheck > 0) return { text: "Check and close the resolved discrepancy", role: "checker", due: soon(3) };

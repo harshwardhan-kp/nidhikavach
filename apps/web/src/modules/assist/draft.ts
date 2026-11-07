@@ -54,3 +54,22 @@ export async function draftLetter(c: CaseDetail, kind: DraftKind, lang: "en" | "
   });
   return { ...data, callId };
 }
+
+/** A6 for the release file: the officer's remarks at their step, built from the checklist. */
+export async function releaseRemarks(c: CaseDetail, step: "recommend" | "check" | "approve", checklist: { label: string; clause: string; met: boolean | null }[], actorId: string) {
+  const { data } = await structured({
+    feature: "A6.draft",
+    model: MODELS.fast,
+    schemaName: "release_remarks",
+    schema: z.object({ remarks: z.string() }),
+    effort: "low",
+    actorId,
+    instrumentId: c.i.id,
+    instructions: [
+      `Write the ${step === "recommend" ? "dealing officer's recommendation" : step === "check" ? "regional officer's check note" : "competent authority's decision remarks"} for releasing an AICTE security-deposit FDR.`,
+      "2 to 3 sentences, formal Indian government English, citing the handbook clauses given. State which conditions are verified; if any is not met, say so plainly instead of recommending. Use only the facts given.",
+    ].join(" "),
+    input: JSON.stringify({ caseNo: c.i.caseNo, institution: c.inst.name, amount: formatPaise(c.i.amountPaise), issued: c.i.issueDate, matures: c.i.maturityDate, verification: c.i.verificationStatus, checklist }),
+  });
+  return data.remarks;
+}

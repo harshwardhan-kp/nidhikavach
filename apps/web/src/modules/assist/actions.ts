@@ -11,7 +11,7 @@ import { today } from "@/lib/clock";
 import { appendLedger } from "@/lib/ledger";
 import { getCase } from "@/modules/cases/queries";
 import { type Brief, caseBrief } from "./brief";
-import { DRAFT_KINDS, type DraftKind, draftLetter } from "./draft";
+import { DRAFT_KINDS, type DraftKind, draftLetter, releaseRemarks } from "./draft";
 
 const officer = (u: SessionUser) => can(u.roles, "instrument.scrutinise") || can(u.roles, "verification.confirm") || can(u.roles, "release.approve");
 
@@ -92,4 +92,55 @@ export async function sendDraftAction(caseNo: string, input: { kind: string; sub
   await appendLedger({ actor: user, action: "letter.sent", entity: "instrument", entityId: c.i.id, payload: { kind, subject, to, aiDraft: callId } });
   revalidatePath(`/app/cases/${c.i.caseNo}`);
   return { ok: true as const, message: `Sent to ${to.join(", ") || "inboxes"} (see the email outbox)` };
+}
+
+export async function remarksAction(caseNo: string, step: string) {
+  const { user, c } = await load(caseNo);
+  if (!officer(user)) return { ok: false as const, message: "Only officers write remarks" };
+  try {
+    const s = z.enum(["recommend", "check", "approve"]).parse(step);
+    const { checklist, currentRequest } = await import("@/modules/release/service");
+    const req = await currentRequest(c.i.id);
+    const list = (await checklist(c.i, req)).map((x) => ({ label: x.label, clause: x.clause, met: x.met }));
+    return { ok: true as const, remarks: await releaseRemarks(c, s, list, user.id) };
+  } catch (e) {
+    return { ok: false as const, message: e instanceof Error ? e.message : "The model is unavailable" };
+  }
+}
+
+export async function askHandbookAction(question: string, caseNo: string | null) {
+  const user = await requireUser();
+  if (!can(user.roles, "reports.view")) return { ok: false as const, message: "The handbook assistant is for officers" };
+  const q = z.string().trim().min(8, "Ask a full question").max(500).safeParse(question);
+  if (!q.success) return { ok: false as const, message: q.error.issues[0].message };
+  try {
+    let facts: object | null = null;
+    let instrumentId: string | null = null;
+    if (caseNo) {
+      const c = await getCase(user, caseNo);
+      if (c) {
+        const { checklist, currentRequest } = await import("@/modules/release/service");
+        const req = await currentRequest(c.i.id);
+        instrumentId = c.i.id;
+        facts = {
+          caseNo: c.i.caseNo,
+          institution: c.inst.name,
+          type: c.i.type,
+          programme: c.i.programme,
+          amountRupees: (c.i.amountPaise ?? 0) / 100,
+          issued: c.i.issueDate,
+          matures: c.i.maturityDate,
+          today: await today(),
+          lanes: { record: c.i.recordStatus, verification: c.i.verificationStatus, validity: c.i.validityStatus, renewal: c.i.renewalStatus, release: c.i.releaseStatus },
+          openDiscrepancies: c.discrepancies.filter((d) => !["closed", "dismissed"].includes(d.status)).map((d) => d.title),
+          releaseChecklist: (await checklist(c.i, req)).map((x) => ({ condition: x.label, clause: x.clause, met: x.met, detail: x.detail })),
+        };
+      }
+    }
+    const a = await (await import("./rules")).askHandbook(q.data, facts, user.id, instrumentId);
+    await appendLedger({ actor: user, action: "ai.handbook_asked", entity: instrumentId ? "instrument" : "settings", entityId: instrumentId ?? "handbook", payload: { question: q.data, verdict: a.verdict, cites: a.cites } });
+    return { ok: true as const, answer: a };
+  } catch (e) {
+    return { ok: false as const, message: e instanceof Error ? e.message : "The model is unavailable" };
+  }
 }

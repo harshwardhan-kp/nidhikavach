@@ -195,6 +195,13 @@ export async function getCase(user: SessionUser, caseNo: string) {
     row.i.ifsc ? db.select().from(schema.ifscBranches).where(eq(schema.ifscBranches.ifsc, row.i.ifsc)).limit(1) : Promise.resolve([]),
   ]);
 
+  const observations = await db
+    .select({ o: schema.observations, author: U.name })
+    .from(schema.observations)
+    .innerJoin(U, eq(U.id, schema.observations.authorId))
+    .where(eq(schema.observations.instrumentId, id))
+    .orderBy(asc(schema.observations.createdAt));
+
   const approvals = releases.length
     ? await db
         .select({ a: schema.approvals, actor: U.name, designation: U.designation })
@@ -226,6 +233,7 @@ export async function getCase(user: SessionUser, caseNo: string) {
     discrepancies,
     releases,
     approvals,
+    observations,
     ledger,
     successors,
     predecessor: predecessor[0] ?? null,

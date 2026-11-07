@@ -260,7 +260,7 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
       if (l.anomaly !== "none" && l.anomaly !== "low_quality") {
         l.discrepancyStatus = rng.weighted([["open", 50], ["awaiting_institution", 35], ["resolved_pending_check", 15]] as const);
       }
-      if (l.anomaly === "none" && l.verification === "bank_confirmed" && regionCode.get(l.inst.regionId) === "WRO" && rng.chance(0.05)) {
+      if (l.anomaly === "none" && l.verification === "bank_confirmed" && regionCode.get(l.inst.regionId) === "WRO" && rng.chance(0.012)) {
         const stage = rng.weighted([["requested", 40], ["recommended", 30], ["checked", 30]] as const);
         const req = addDays(today, -rng.int(stage === "requested" ? 1 : 4, 9));
         l.release = stage;

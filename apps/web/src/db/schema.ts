@@ -477,10 +477,14 @@ export const notifications = pgTable(
     subject: text("subject").notNull(),
     body: text("body").notNull(),
     link: text("link"),
+    /** Set when a lifecycle reminder produced this message (cleared with it when the demo clock goes back). */
+    reminderId: uuid("reminder_id").references(() => reminders.id, { onDelete: "cascade" }),
+    /** Officer who sent it (drafted letters); null for system messages. */
+    sentBy: uuid("sent_by").references(() => users.id),
     readAt: ts("read_at"),
     createdAt: createdAt(),
   },
-  (t) => [index("notifications_user_idx").on(t.userId, t.readAt)],
+  (t) => [index("notifications_user_idx").on(t.userId, t.readAt), index("notifications_channel_idx").on(t.channel, t.createdAt)],
 );
 
 /* ----------------------------------------------------------- audit & AI -- */

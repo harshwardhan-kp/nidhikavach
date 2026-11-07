@@ -2,6 +2,8 @@
 
 import {
   BarChart3,
+  Bell,
+  Mail,
   Clock,
   FolderOpen,
   Handshake,
@@ -31,9 +33,11 @@ const ICONS: Record<string, LucideIcon> = {
   settings: Settings,
   upload: Upload,
   sheet: FileSpreadsheet,
+  bell: Bell,
+  mail: Mail,
 };
 
-export function SidebarNav({ items }: { items: NavItem[] }) {
+export function SidebarNav({ items, badges = {} }: { items: NavItem[]; badges?: Record<string, number> }) {
   const pathname = usePathname();
   return (
     <nav className="flex flex-col gap-0.5" aria-label="Portal">
@@ -64,7 +68,8 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
             )}
           >
             <Icon size={15} strokeWidth={1.6} />
-            {item.label}
+            <span className="flex-1">{item.label}</span>
+            {badges[item.href] ? <span className="rounded-full bg-red px-1.5 font-mono text-[10.5px] text-white">{badges[item.href]}</span> : null}
           </Link>
         );
       })}

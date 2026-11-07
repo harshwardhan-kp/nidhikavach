@@ -114,6 +114,28 @@ export async function confirmLetterAction(caseNo: string, verificationId: string
 
 /* ---------------------------------------------------------- scrutiny -- */
 
+/** Accepting a renewal closes the link it replaces: same branch = renewed, different bank/branch = replaced. */
+async function completeRenewal(i: typeof schema.instruments.$inferSelect, user: SessionUser) {
+  const [old] = await db.select().from(schema.instruments).where(eq(schema.instruments.id, i.replacesInstrumentId!));
+  if (!old || ["renewed", "replaced"].includes(old.renewalStatus)) return null;
+  const status = old.ifsc && old.ifsc === i.ifsc ? "renewed" : "replaced";
+  await db
+    .update(schema.instruments)
+    .set({ renewalStatus: status, nextAction: null, nextActionDue: null, ownerUserId: null, updatedAt: new Date() })
+    .where(eq(schema.instruments.id, old.id));
+  await appendLedger({ actor: user, action: `renewal.${status}`, entity: "instrument", entityId: old.id, payload: { by: i.caseNo } });
+  await appendLedger({ actor: user, action: "renewal.accepted", entity: "instrument", entityId: i.id, payload: { closes: old.caseNo, as: status } });
+  const [inst] = await db.select().from(schema.institutions).where(eq(schema.institutions.id, i.institutionId));
+  const [instUser] = await db.select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.institutionId, i.institutionId)).limit(1);
+  const subject = `${old.caseNo} ${status}: the security deposit continues on ${i.caseNo}`;
+  const body = `${inst?.name ?? "The institution"}: AICTE has verified and accepted ${i.caseNo}, which ${status === "renewed" ? "renews" : "replaces"} ${old.caseNo}. No further reminders will be sent for ${old.caseNo}.`;
+  const msgs: (typeof schema.notifications.$inferInsert)[] = [];
+  if (instUser) msgs.push({ channel: "inbox", userId: instUser.id, instrumentId: i.id, subject, body, link: `/app/cases/${i.caseNo}`, sentBy: user.id });
+  if (inst?.nodalEmail) msgs.push({ channel: "email", institutionId: inst.id, toAddress: inst.nodalEmail, instrumentId: i.id, subject, body, link: `/app/cases/${i.caseNo}`, sentBy: user.id });
+  if (msgs.length) await db.insert(schema.notifications).values(msgs);
+  return { caseNo: old.caseNo, status };
+}
+
 export async function acceptRecordAction(caseNo: string) {
   return run(caseNo, "instrument.scrutinise", async (user, i) => {
     if (!["bank_confirmed", "manual_confirmed"].includes(i.verificationStatus)) throw new Error("The bank has not confirmed this instrument yet");
@@ -125,7 +147,8 @@ export async function acceptRecordAction(caseNo: string) {
     await db.update(schema.instruments).set({ recordStatus: "accepted" }).where(eq(schema.instruments.id, i.id));
     await appendLedger({ actor: user, action: "record.accepted", entity: "instrument", entityId: i.id, payload: {} });
     await recomputeInstrument(i.id, user, "record accepted");
-    return "Record accepted into the registry";
+    const closed = i.replacesInstrumentId ? await completeRenewal(i, user) : null;
+    return closed ? `Record accepted. ${closed.caseNo} is now closed as ${closed.status}; the chain continues on ${i.caseNo}.` : "Record accepted into the registry";
   });
 }
 

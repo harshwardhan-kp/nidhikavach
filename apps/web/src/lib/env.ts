@@ -12,6 +12,7 @@ const schema = z.object({
   AZURE_DI_KEY: z.string().min(10).optional(),
   // Shows the one-click role switcher and the demo clock. On for the pitch prototype.
   DEMO_MODE: z.enum(["0", "1"]).default("1"),
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 export const env = schema.parse(process.env);

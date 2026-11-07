@@ -1,4 +1,5 @@
-import { Search } from "lucide-react";
+import { Bell, Search } from "lucide-react";
+import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { RoleSwitcher } from "@/components/role-switcher";
 import { SidebarNav } from "@/components/sidebar";
@@ -8,10 +9,11 @@ import { requireUser } from "@/lib/auth/session";
 import { getClockOffsetDays, today } from "@/lib/clock";
 import { NAV } from "@/lib/nav";
 import { formatDate } from "@/lib/utils";
+import { unreadCount } from "@/modules/messages/queries";
 
 export default async function PortalLayout({ children }: LayoutProps<"/app">) {
   const user = await requireUser();
-  const [offset, todayIso] = await Promise.all([getClockOffsetDays(), today()]);
+  const [offset, todayIso, unread] = await Promise.all([getClockOffsetDays(), today(), unreadCount(user)]);
   const items = NAV.filter((i) => !i.perm || can(user.roles, i.perm));
   const scope = user.institutionName ?? (user.regionName ? `${user.regionName} region` : "all regions");
 
@@ -21,7 +23,7 @@ export default async function PortalLayout({ children }: LayoutProps<"/app">) {
         <div className="px-2">
           <Logo href="/app" />
         </div>
-        <SidebarNav items={items} />
+        <SidebarNav items={items} badges={{ "/app/inbox": unread }} />
         <div className="mt-auto rounded-[12px] border border-line bg-card p-3">
           <div className="tag">[scope]</div>
           <div className="mt-1 text-[12.5px] font-semibold">{scope}</div>
@@ -39,6 +41,10 @@ export default async function PortalLayout({ children }: LayoutProps<"/app">) {
             <span className="tag text-[12px]">[{formatDate(todayIso)}]</span>
             {offset !== 0 ? <Pill tone="red">demo clock {offset > 0 ? `+${offset}` : offset}d</Pill> : null}
           </div>
+          <Link href="/app/inbox" className="relative rounded-[10px] border border-line bg-card p-2 hover:border-ink" aria-label={`Inbox, ${unread} unread`}>
+            <Bell size={16} />
+            {unread ? <span className="absolute -top-1.5 -right-1.5 rounded-full bg-red px-1.5 font-mono text-[10px] text-white">{unread}</span> : null}
+          </Link>
           <RoleSwitcher user={user} />
         </header>
         <main className="flex-1 px-5 py-7 md:px-8">{children}</main>

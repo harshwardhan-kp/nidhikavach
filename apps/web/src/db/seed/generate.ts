@@ -580,5 +580,7 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
     }
   }
 
+  // Every institution has a nodal-officer mailbox (synthetic) for the email outbox.
+  for (const inst of ds.institutions) inst.nodalEmail ??= `nodal.${inst.aicteId.slice(2)}@inst.demo.nidhikavach.in`;
   return ds;
 }

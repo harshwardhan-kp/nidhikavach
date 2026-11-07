@@ -11,7 +11,9 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed/index.ts"
+    "db:seed": "tsx src/db/seed/index.ts",
+    "db:lifecycle": "node --conditions=react-server --import tsx --env-file=.env.local scripts/lifecycle.mts",
+    "db:reseed": "npm run db:seed -- --reset --full && npm run db:lifecycle -- --silent"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",

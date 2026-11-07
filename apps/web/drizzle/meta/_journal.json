@@ -29,6 +29,13 @@
       "when": 1794041926736,
       "tag": "0003_release_requested_by_nullable",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794051746639,
+      "tag": "0004_lifecycle_notifications",
+      "breakpoints": true
     }
   ]
 }

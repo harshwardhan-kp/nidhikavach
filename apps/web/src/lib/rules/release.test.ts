@@ -23,3 +23,11 @@ describe("evaluateRelease", () => {
     expect(allMet(evaluateRelease({ ...base, attested: { cell_clearances: true, no_dues_or_penalty: true } }))).toBe(true);
   });
 });
+
+import { pdfSafe } from "@/lib/pdf-text";
+describe("pdfSafe", () => {
+  it("keeps the order printable in standard PDF fonts", () => {
+    expect(pdfSafe("release of the ₹15,00,000 FDR — “approved”")).toBe('release of the Rs. 15,00,000 FDR - "approved"');
+    expect(pdfSafe("नमस्ते ok")).toBe("?????? ok");
+  });
+});

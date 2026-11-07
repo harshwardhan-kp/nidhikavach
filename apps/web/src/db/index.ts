@@ -13,6 +13,7 @@ export const pg =
     ssl: "require",
     max: 4,
     idle_timeout: 20,
+    max_lifetime: 60 * 5,
     connect_timeout: 10,
     onnotice: () => {},
   });

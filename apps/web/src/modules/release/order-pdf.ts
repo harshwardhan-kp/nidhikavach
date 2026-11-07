@@ -1,6 +1,7 @@
 import "server-only";
 import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import QRCode from "qrcode";
+import { pdfSafe } from "@/lib/pdf-text";
 
 export type OrderContent = {
   orderNo: string;
@@ -21,7 +22,7 @@ const RED = rgb(0.906, 0.227, 0.227);
 /** Wraps text to a width using the font's metrics. */
 function wrap(text: string, font: { widthOfTextAtSize: (t: string, s: number) => number }, size: number, width: number) {
   const lines: string[] = [];
-  for (const para of text.split("\n")) {
+  for (const para of pdfSafe(text).split("\n")) {
     let line = "";
     for (const word of para.split(" ")) {
       const next = line ? `${line} ${word}` : word;
@@ -48,7 +49,7 @@ export async function buildOrderPdf(o: OrderContent) {
   const W = 595.28 - 2 * L;
   let y = 790;
   const text = (t: string, opts: { size?: number; f?: typeof font; color?: ReturnType<typeof rgb>; x?: number } = {}) => {
-    page.drawText(t, { x: opts.x ?? L, y, size: opts.size ?? 10.5, font: opts.f ?? font, color: opts.color ?? INK });
+    page.drawText(pdfSafe(t), { x: opts.x ?? L, y, size: opts.size ?? 10.5, font: opts.f ?? font, color: opts.color ?? INK });
   };
   const para = (t: string, size = 10.5, gap = 4) => {
     for (const line of wrap(t, font, size, W)) {
@@ -103,16 +104,19 @@ export async function buildOrderPdf(o: OrderContent) {
   text("Decision trail (maker / checker / authority, three different officers)", { size: 9.5, f: bold });
   y -= 15;
   for (const a of o.approvals) {
-    text(`${a.step.padEnd(10)} ${a.name}, ${a.designation}`, { size: 9, f: mono });
+    text(`${a.step.padEnd(10)} ${a.name}`, { size: 9, f: mono });
     text(a.at, { size: 9, f: mono, x: L + W - mono.widthOfTextAtSize(a.at, 9) });
-    y -= 12;
+    y -= 11;
+    text(a.designation, { size: 8.5, color: MUTED, x: L + 14 });
+    y -= 11;
     if (a.comment) {
-      for (const line of wrap(`"${a.comment}"`, font, 8.5, W - 20).slice(0, 2)) {
-        text(line, { size: 8.5, color: MUTED, x: L + 14 });
+      const lines = wrap(`"${a.comment}"`, font, 8.5, W - 20);
+      for (const [k, line] of lines.slice(0, 3).entries()) {
+        text(k === 2 && lines.length > 3 ? `${line} ...` : line, { size: 8.5, color: MUTED, x: L + 14 });
         y -= 11;
       }
     }
-    y -= 3;
+    y -= 4;
   }
 
   // Signature block + QR.

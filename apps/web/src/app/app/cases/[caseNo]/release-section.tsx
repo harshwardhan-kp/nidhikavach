@@ -56,6 +56,7 @@ export async function ReleaseSection({ c, user }: { c: CaseDetail; user: Session
       action={open && mayStep ? { step: step!, blocked: actedBefore ? "You already acted on this request, so a different officer must take this step." : null } : null}
       canRequest={eligible}
       canRecordLien={req?.state === "approved" && can(user.roles, "release.recommend")}
+      canAsk={can(user.roles, "reports.view")}
       />
     </Card>
   );

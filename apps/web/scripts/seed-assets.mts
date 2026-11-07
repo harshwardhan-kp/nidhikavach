@@ -6,7 +6,7 @@ import { eq, sql } from "drizzle-orm";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { db, schema } from "@/db";
 import { SEED_DOSSIER_KEY } from "@/db/seed/generate";
-import { uploadBytes } from "@/lib/sidecar";
+import { fileMeta, uploadBytes } from "@/lib/sidecar";
 
 const pdf = await PDFDocument.create();
 const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -24,7 +24,9 @@ for (const [title, body] of sections) {
   page.drawText(body, { x: 56, y: 720, size: 10.5, font, maxWidth: 480, lineHeight: 15 });
 }
 const bytes = await pdf.save();
-const meta = await uploadBytes(SEED_DOSSIER_KEY, bytes, "application/pdf", "release-dossier.pdf");
+// Stored files are write-once on the sidecar: reuse the dossier if an earlier seed uploaded it.
+const existing = await fileMeta(SEED_DOSSIER_KEY);
+const meta = existing.exists ? existing : await uploadBytes(SEED_DOSSIER_KEY, bytes, "application/pdf", "release-dossier.pdf");
 const res = await db.update(schema.documents).set({ sha256: meta.sha256!, sizeBytes: meta.size! }).where(eq(schema.documents.fileKey, SEED_DOSSIER_KEY)).returning({ id: schema.documents.id });
 console.log({ dossier: meta.sha256?.slice(0, 12), documents: res.length, releases: (await db.execute(sql`select state, count(*) from release_requests group by 1`)).map((r) => `${r.state}:${r.count}`) });
 process.exit(0);

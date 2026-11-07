@@ -448,7 +448,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
             )}
           </Section>
 
-          {!isInstitution ? (
+          {!isInstitution && !["released", "refunded"].includes(i.releaseStatus) && !["renewed", "replaced"].includes(i.renewalStatus) ? (
             <Section title="actions" aside={<span className="tag">[{user.roles.join(" · ")}]</span>}>
               <ActionsPanel
                 caseNo={i.caseNo}

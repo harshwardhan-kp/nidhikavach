@@ -94,14 +94,15 @@ export async function sendDraftAction(caseNo: string, input: { kind: string; sub
   return { ok: true as const, message: `Sent to ${to.join(", ") || "inboxes"} (see the email outbox)` };
 }
 
-export async function remarksAction(caseNo: string, step: string) {
+export async function remarksAction(caseNo: string, step: string, attest?: { cell_clearances?: boolean; no_dues_or_penalty?: boolean }) {
   const { user, c } = await load(caseNo);
   if (!officer(user)) return { ok: false as const, message: "Only officers write remarks" };
   try {
     const s = z.enum(["recommend", "check", "approve"]).parse(step);
     const { checklist, currentRequest } = await import("@/modules/release/service");
     const req = await currentRequest(c.i.id);
-    const list = (await checklist(c.i, req)).map((x) => ({ label: x.label, clause: x.clause, met: x.met }));
+    // Include what the officer has ticked on screen but not yet saved.
+    const list = (await checklist(c.i, req)).map((x) => ({ label: x.label, clause: x.clause, met: x.key === "cell_clearances" || x.key === "no_dues_or_penalty" ? (attest?.[x.key] ? true : x.met) : x.met }));
     return { ok: true as const, remarks: await releaseRemarks(c, s, list, user.id) };
   } catch (e) {
     return { ok: false as const, message: e instanceof Error ? e.message : "The model is unavailable" };

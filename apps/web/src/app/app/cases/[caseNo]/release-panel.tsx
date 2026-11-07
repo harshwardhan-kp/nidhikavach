@@ -19,6 +19,7 @@ type Props = {
   action: { step: "recommend" | "check" | "approve"; blocked: string | null } | null;
   canRequest: boolean;
   canRecordLien: boolean;
+  canAsk: boolean;
 };
 
 const STEPS = [
@@ -28,7 +29,7 @@ const STEPS = [
 ] as const;
 const field = "w-full rounded-[9px] border border-line bg-white px-2.5 py-2 text-[13px] outline-none focus:border-ink";
 
-function Checklist({ items, caseNo }: { items: Condition[]; caseNo: string }) {
+function Checklist({ items, caseNo, canAsk }: { items: Condition[]; caseNo: string; canAsk: boolean }) {
   return (
     <ul className="flex flex-col gap-1.5">
       {items.map((c) => (
@@ -38,7 +39,7 @@ function Checklist({ items, caseNo }: { items: Condition[]; caseNo: string }) {
             <span className={cn(c.met === false && "text-red")}>{c.label}</span> <span className="tag">[{c.clause}]</span>
             <div className="text-txt">
               {c.detail}{" "}
-              {c.met !== true ? (
+              {c.met !== true && canAsk ? (
                 <Link href={`/app/rules?case=${caseNo}&q=${encodeURIComponent(`${c.label}: what does the handbook require here? (${c.clause})`)}`} className="tag underline hover:text-ink">
                   ask the handbook
                 </Link>
@@ -71,7 +72,7 @@ export function ReleasePanel(p: Props) {
     start(async () => done(await decideReleaseAction(p.caseNo, { step: p.action!.step, decision, comment, attest })));
   const draftRemarks = () =>
     start(async () => {
-      const r = await remarksAction(p.caseNo, p.action!.step);
+      const r = await remarksAction(p.caseNo, p.action!.step, attest);
       if (r.ok) setComment(r.remarks);
       else setMsg({ ok: false, text: r.message });
     });
@@ -113,7 +114,7 @@ export function ReleasePanel(p: Props) {
       {live || !r ? (
         <div>
           <div className="tag mb-1.5">[conditions · clause 6.46 and Affidavit 6]</div>
-          <Checklist items={p.checklist} caseNo={p.caseNo} />
+          <Checklist items={p.checklist} caseNo={p.caseNo} canAsk={p.canAsk} />
         </div>
       ) : null}
 

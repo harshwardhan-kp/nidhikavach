@@ -1,6 +1,6 @@
 # NidhiKavach build progress (handoff)
 
-Last updated: 7 Nov 2026 (P3 done). Branch `prototype` (pushed). Plan: [`BUILD_PLAN.md`](BUILD_PLAN.md).
+Last updated: 7 Nov 2026 (P4 done). Branch `prototype` (pushed). Plan: [`BUILD_PLAN.md`](BUILD_PLAN.md).
 
 ## Done
 
@@ -23,13 +23,22 @@ Last updated: 7 Nov 2026 (P3 done). Branch `prototype` (pushed). Plan: [`BUILD_P
   - A4 case brief (`modules/assist/brief.ts`, gpt-6.1-terra): 4–5 cited lines + what blocks the case; citations jump to the audit-trail entry. A6 drafts (`modules/assist/draft.ts`): letter to institution / bank request / escalation note, English or Hindi, officer edits then sends to the outbox; ledger `letter.sent`.
   - Seed: every institution has a synthetic nodal mailbox; FDR-23-11820 is `requested` until FDR-26-05402 is accepted; FDR-26-03952 and FDR-26-05811 start under scrutiny.
 
-## Next: P4 release (BUILD_PLAN §2, §7 "Release", §7a A6 remarks, A7)
+- **P4 release** (done 7 Nov):
+  - Checklist `lib/rules/release.ts` (paraphrasing APH 2024-27 cl. 1.12(iv), 6.46(a)-(c), (h)-(i), 2.21(h)-(i), Affidavit 6): hold complete (or closure/merger certificate for a refund), bank confirmed, no open discrepancy, dossier uploaded, plus two officer attestations (cell clearances [simulated], no dues/penalty). A FDR whose 10-year hold ends at maturity is not chased for renewal; its next action is "request release".
+  - Flow `modules/release/actions.ts`: institution requests with a dossier upload → maker recommends (attests; A6 remarks via `remarksAction`) → checker checks → authority approves and eSigns → maker records the bank's lien removal [simulated] → released/refunded. Reject at any step with a reason. Separation of duties by user id (requester and every earlier approver are excluded).
+  - eSign `lib/esign.ts`: Ed25519 per officer, private key derived from SESSION_SECRET + user id (never stored), public key in `signing_keys`. Order PDF `modules/release/order-pdf.ts` (pdf-lib + QR, `pdfSafe` for WinAnsi), stored on the sidecar at `orders/<requestId>.pdf`, SHA-256 on the ledger. Public `/verify/[requestId]` checks signature, registry match and file hash (no login).
+  - `/app/releases` board (to recommend / check / decide / awaiting bank / closed). Case page release section `release-section.tsx` + `release-panel.tsx`.
+  - A7 `/app/rules`: 20 paraphrased, clause-referenced notes (`db/seed/rule-notes.ts`) embedded with text-embedding-3-small into `rule_notes` (pgvector); `gpt-6.1-terra` answers only from retrieved notes (+ case facts and checklist when opened from a case), with verdict, citations and checks. The 2026-27 addendum was not reviewed (Firecrawl credits ran out).
+  - Seed: showcase FDR-16-03310 (demo institution, hold complete 12 days ago) for the live request; FDR-16-07734 waits at the authority. `npm run db:reseed` = seed + `db:assets` (shared synthetic dossier, write-once on the sidecar) + `db:rules` + `db:lifecycle --silent`.
 
-1. Release / refund request by the institution with reason; auto-checklist from `RULE_SET_V1.release.conditions`.
-2. Three-person approval (maker recommends, checker checks, authority approves), separation of duties by user id; showcase FDR-16-07734 waits at the authority.
-3. eSign (simulated, `signing_keys`), release-order PDF with QR to a public verify page.
-4. A7 APH rules assistant (handbook chunks + embeddings in pgvector, answers with clause citations) and release-order remarks via A6.
-5. Tests, build, reseed (`npm run db:reseed`), deploy, browser-verify, commit + push, mark P4 done.
+## Next: P5 dashboard + reports (BUILD_PLAN §7 "Dashboard + reports", "Plain-language search", "Metrics"; §7a A3, A5, A10)
+
+1. Overview per the deck mock: KPIs, cases needing action, maturity forecast, region view for HQ roles.
+2. Five reports with CSV / PDF export (registry, maturity, renewals overdue, discrepancies ageing, releases).
+3. A3 plain-language search in the top bar (`gpt-6-luna` → allow-listed filter chips → /app/cases).
+4. A5 "ask this case" chat (read-only tools) and A10 weekly bureau briefing (regenerated on clock move).
+5. Metrics page: the six scenarios before/after vs a written manual baseline.
+6. Tests, build, reseed, deploy, browser-verify, commit + push, mark P5 done.
 
 ## Working notes
 

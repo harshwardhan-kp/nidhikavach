@@ -72,6 +72,6 @@ export function reminderText(r: DueReminder, c: { caseNo: string; institution: s
   const who = ["the institution", "the dealing officer", "the regional officer", "the competent authority"][r.level];
   return {
     subject: `${c.caseNo}: renewal overdue, escalated to ${who} (level ${r.level})`,
-    body: `FDR ${c.caseNo} of ${c.institution} (${c.amount}) matured on ${c.maturityDate} and no renewed FDR has been received after the grace period. Escalated to ${who} for action.`,
+    body: `${c.caseNo} of ${c.institution} (${c.amount}) matured on ${c.maturityDate} and no renewed FDR has been received after the grace period. Escalated to ${who} for action.`,
   };
 }

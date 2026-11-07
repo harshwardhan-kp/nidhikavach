@@ -3,6 +3,8 @@
 import {
   BarChart3,
   Bell,
+  Plug,
+  ShieldCheck,
   Gauge,
   BookOpen,
   Mail,
@@ -36,6 +38,8 @@ const ICONS: Record<string, LucideIcon> = {
   upload: Upload,
   sheet: FileSpreadsheet,
   bell: Bell,
+  plug: Plug,
+  shield: ShieldCheck,
   gauge: Gauge,
   book: BookOpen,
   mail: Mail,

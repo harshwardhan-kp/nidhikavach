@@ -18,5 +18,7 @@ export const NAV: NavItem[] = [
   { href: "/app/inbox", label: "inbox", icon: "bell" },
   { href: "/app/outbox", label: "email outbox", icon: "mail" },
   { href: "/app/audit", label: "audit ledger", icon: "link", perm: "ledger.view" },
+  { href: "/app/integrations", label: "integrations", icon: "plug" },
+  { href: "/app/security", label: "security", icon: "shield" },
   { href: "/app/admin", label: "admin", icon: "settings", perm: "admin.clock" },
 ];

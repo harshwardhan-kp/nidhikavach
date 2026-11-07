@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { requirePermission } from "@/lib/auth/session";
@@ -12,6 +13,7 @@ import { FIELDS, isAicteLien } from "@/lib/rules/fields";
 import { renewalLane, validityLane } from "@/lib/rules/lanes";
 import { nextAction } from "@/lib/rules/next-action";
 import { fileMeta, signedUploadUrl } from "@/lib/sidecar";
+import { readScan } from "@/modules/verify/pipeline";
 import { findBranch, IFSC_RE, type Branch } from "./ifsc";
 
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -118,7 +120,7 @@ export async function submitInstrument(_prev: SubmitState, formData: FormData): 
     autoRenew: v.autoRenew ? "Yes" : "No",
   };
 
-  const caseNo = await db.transaction(async (tx) => {
+  const created = await db.transaction(async (tx) => {
     const caseNo = await nextCaseNo(tx, todayIso.slice(2, 4));
     const [row] = await tx
       .insert(schema.instruments)
@@ -194,8 +196,10 @@ export async function submitInstrument(_prev: SubmitState, formData: FormData): 
         link: `/app/cases/${caseNo}`,
       });
     }
-    return caseNo;
+    return { caseNo, id: row.id };
   });
 
-  redirect(`/app/cases/${caseNo}?submitted=1`);
+  // Doc-AI and the model start reading as soon as the response is sent; the case page refreshes until they finish.
+  after(() => readScan(created.id, null).catch((e) => console.error("auto read failed", created.caseNo, e)));
+  redirect(`/app/cases/${created.caseNo}?submitted=1`);
 }

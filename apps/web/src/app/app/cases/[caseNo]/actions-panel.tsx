@@ -106,9 +106,9 @@ export function ActionsPanel(p: Props) {
     <div>
       <div className="flex flex-col gap-2">
         {p.can.scrutinise && p.hasScan ? (
-          <Button onClick={() => go("read", () => readScanAction(p.caseNo))} disabled={pending || p.scanRunning} variant={p.scanRead ? "light" : "dark"} className="justify-start">
+          <Button onClick={() => go("read", () => readScanAction(p.caseNo))} disabled={pending} variant={p.scanRead ? "light" : "dark"} className="justify-start">
             {busy === "read" ? <Loader2 size={14} className="animate-spin" /> : null}
-            {p.scanRunning ? "[scan is being read…]" : p.scanRead ? "[read the scan again]" : "[read scan · doc-ai + gpt-6.1-terra]"}
+            {p.scanRunning ? "[being read… · read again]" : p.scanRead ? "[read the scan again]" : "[read scan · doc-ai + gpt-6.1-terra]"}
           </Button>
         ) : null}
         {busy === "read" ? <p className="font-mono text-[11.5px] text-txt">{stage}</p> : null}

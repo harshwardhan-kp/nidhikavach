@@ -7,6 +7,9 @@ import { requirePermission } from "@/lib/auth/session";
 import { formatDate } from "@/lib/utils";
 import { SubmitForm } from "./submit-form";
 
+// The submission kicks off the scan read with after(), which runs within this budget.
+export const maxDuration = 60;
+
 export const metadata: Metadata = { title: "Submit an FDR" };
 
 export default async function SubmitPage({ searchParams }: PageProps<"/app/submit">) {

@@ -40,7 +40,7 @@ const docInput = (url: string, mime: string, text: string) => [
 ];
 
 /** A1: second, independent reader of the scan (gpt-6.1-terra vision). */
-export function visionRead(url: string, mime: string, ctx: { actorId: string; instrumentId: string; docSha: string }) {
+export function visionRead(url: string, mime: string, ctx: { actorId: string | null; instrumentId: string; docSha: string | null }) {
   return structured({
     feature: "A1.extract",
     model: MODELS.quality,
@@ -78,7 +78,7 @@ export const tamperOpinionSchema = z.object({
 export type TamperOpinion = z.infer<typeof tamperOpinionSchema>;
 
 /** A2: second opinion on tampering, given the heuristic findings. Advisory only. */
-export function tamperOpinion(url: string, mime: string, findings: TamperFinding[], ctx: { actorId: string; instrumentId: string; docSha: string }) {
+export function tamperOpinion(url: string, mime: string, findings: TamperFinding[], ctx: { actorId: string | null; instrumentId: string; docSha: string | null }) {
   return structured({
     feature: "A2.tamper",
     model: MODELS.quality,

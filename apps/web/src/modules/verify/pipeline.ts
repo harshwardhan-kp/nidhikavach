@@ -9,7 +9,8 @@ import { reconcile } from "./reconcile";
 import { recomputeInstrument } from "./recompute";
 import { tamperOpinion, visionRead, type TamperOpinion } from "./vision";
 
-type Actor = { id: string; primaryRole: string };
+/** null = the system, e.g. the automatic read right after a submission. */
+type Actor = { id: string; primaryRole: string } | null;
 
 /**
  * Reads and inspects the latest scan of an instrument: Document Intelligence
@@ -18,6 +19,19 @@ type Actor = { id: string; primaryRole: string };
  * three-source table and the trust score.
  */
 export async function readScan(instrumentId: string, actor: Actor) {
+  try {
+    return await readScanInner(instrumentId, actor);
+  } catch (e) {
+    // Never leave a scan stuck as "running".
+    await db
+      .update(schema.documents)
+      .set({ extractionStatus: "failed", tamperStatus: "failed" })
+      .where(and(eq(schema.documents.instrumentId, instrumentId), eq(schema.documents.extractionStatus, "running")));
+    throw e;
+  }
+}
+
+async function readScanInner(instrumentId: string, actor: Actor) {
   const [doc] = await db
     .select()
     .from(schema.documents)
@@ -36,7 +50,7 @@ export async function readScan(instrumentId: string, actor: Actor) {
 
   await db.update(schema.documents).set({ extractionStatus: "running", tamperStatus: "running" }).where(eq(schema.documents.id, doc.id));
   const url = signedGetUrl(doc.fileKey, doc.filename, 600);
-  const ctx = { actorId: actor.id, instrumentId, docSha: doc.sha256 };
+  const ctx = { actorId: actor?.id ?? null, instrumentId, docSha: doc.sha256 };
   const t0 = Date.now();
 
   // Three lanes in parallel: Doc-AI, the model's reading, and (heuristic scan -> model's tamper opinion).
@@ -68,7 +82,8 @@ export async function readScan(instrumentId: string, actor: Actor) {
   await db
     .update(schema.documents)
     .set({
-      extractionStatus: readersOk ? "done" : "failed",
+      // Stays "running" until the case is rescored below, so the page keeps refreshing until then.
+      extractionStatus: readersOk ? "running" : "failed",
       extraction: {
         fields,
         di: diRes.status === "fulfilled" ? { keyValuePairs: diRes.value.keyValuePairs?.length ?? 0, pages: diRes.value.pages?.length ?? 0 } : { error: String((diRes as PromiseRejectedResult).reason).slice(0, 200) },
@@ -103,5 +118,6 @@ export async function readScan(instrumentId: string, actor: Actor) {
   // Reading the scan starts scrutiny.
   await db.update(schema.instruments).set({ recordStatus: "under_scrutiny" }).where(and(eq(schema.instruments.id, instrumentId), eq(schema.instruments.recordStatus, "submitted")));
   const result = await recomputeInstrument(instrumentId, actor, "scan read", extra);
+  if (readersOk) await db.update(schema.documents).set({ extractionStatus: "done" }).where(eq(schema.documents.id, doc.id));
   return { agreed, tamperScore, fields, result, readers: { di: diRes.status, llm: llmRes.status, tamper: tamperRes.status } };
 }

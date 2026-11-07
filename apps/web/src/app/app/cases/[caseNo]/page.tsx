@@ -18,6 +18,7 @@ import { documentUrl } from "@/modules/documents/view";
 import { signedGetUrl, type TamperFinding } from "@/lib/sidecar";
 import type { TamperOpinion } from "@/modules/verify/vision";
 import { ActionsPanel, type PendingLetter } from "./actions-panel";
+import { AutoRefresh } from "./auto-refresh";
 import { DiscrepancyControls } from "./discrepancy-item";
 import { RiskLine, RiskLineSkeleton } from "./risk-line";
 import { type ScanBox, ScanViewer } from "./scan-viewer";
@@ -133,13 +134,18 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
   const thread = (id: string) => c.observations.filter(({ o }) => o.discrepancyId === id && (!isInstitution || o.sharedWithInstitution));
   const openTitles = c.discrepancies.filter((d) => !["closed", "dismissed"].includes(d.status)).map((d) => d.title);
 
+  // Keep the page live while the scan is read in the background (right after a submission).
+  const reading = scan?.doc.extractionStatus === "running" || (!!submitted && !hasReading && scan?.doc.extractionStatus === "pending");
+
   return (
     <div className="flex flex-col gap-4">
+      {reading ? <AutoRefresh /> : null}
       {submitted ? (
         <div role="status" className="flex items-center gap-2 rounded-[12px] border border-green/40 bg-green-soft px-4 py-3 text-[13px]">
           <CheckCircle2 size={16} className="text-green" />
           <span>
-            Submitted as <b className="font-mono">{i.caseNo}</b>. The dealing officer has been notified; the scan goes to Doc-AI next.
+            Submitted as <b className="font-mono">{i.caseNo}</b>. The dealing officer has been notified.{" "}
+            {hasReading ? "Doc-AI and gpt-6.1-terra have read the scan." : "Doc-AI and gpt-6.1-terra are reading the scan now…"}
           </span>
         </div>
       ) : null}
@@ -318,8 +324,10 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
                         ) : null}
                       </div>
                     </>
-                  ) : scan.doc.extractionStatus === "running" ? (
-                    <p className="text-txt">The scan is being read…</p>
+                  ) : reading ? (
+                    <p className="text-txt">Doc-AI and gpt-6.1-terra are reading the scan… (about 15 seconds)</p>
+                  ) : scan.doc.extractionStatus === "failed" ? (
+                    <p className="text-txt">The last read failed. Read it again from the actions panel.</p>
                   ) : scan.doc.extractionStatus === "done" ? (
                     <p className="text-txt">Checked at intake; the detailed reading was not kept for this older record. Read it again to see both readers and the tamper check.</p>
                   ) : (

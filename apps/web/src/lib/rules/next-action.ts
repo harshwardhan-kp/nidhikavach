@@ -1,5 +1,5 @@
 /** Who should act next on an instrument, and what they should do. Pure. */
-import { addDays } from "./lanes";
+import { addDays, holdCompleteAtMaturity } from "./lanes";
 
 export type NextActionInput = {
   recordStatus: string;
@@ -13,6 +13,7 @@ export type NextActionInput = {
   discrepanciesAwaitingCheck?: number;
   /** A bank letter has been recorded and waits for a second officer. */
   letterAwaitingCheck?: boolean;
+  issueDate?: string | null;
   today: string;
 };
 
@@ -37,6 +38,8 @@ export function nextAction(i: NextActionInput): NextAction {
   if (i.verificationStatus === "mismatch") return { text: "Raise a discrepancy on the bank mismatch", role: "maker", due: soon(2) };
   if (i.recordStatus === "under_scrutiny" && ["bank_confirmed", "manual_confirmed"].includes(i.verificationStatus))
     return { text: "Accept the record into the registry", role: "maker", due: soon(3) };
+  if (i.recordStatus === "accepted" && ["none", "rejected"].includes(i.releaseStatus) && holdCompleteAtMaturity(i.issueDate, i.maturityDate) && ["matured", "expired", "expiring"].includes(i.validityStatus))
+    return { text: "Request release of the security deposit (hold complete)", role: "institution", due: soon(30) };
   if (i.renewalStatus === "overdue") return { text: "Escalate: renewed FDR not received after maturity", role: "checker", due: soon(2) };
   if (i.renewalStatus === "due" && i.maturityDate)
     return { text: "Submit the renewed / replacement FDR", role: "institution", due: i.maturityDate };

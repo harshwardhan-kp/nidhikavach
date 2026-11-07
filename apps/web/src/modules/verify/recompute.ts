@@ -105,8 +105,8 @@ export async function recomputeInstrument(instrumentId: string, actor: Actor, re
 
   // 3. lanes, next action, owner
   const lienKnown = lienValues.length ? lienValues.every(isAicteLien) : i.lienHolder ? isAicteLien(i.lienHolder) : null;
-  const validity = ["renewed", "replaced"].includes(i.renewalStatus) ? i.validityStatus : validityLane({ maturityDate: i.maturityDate, today: todayIso, lienIsAicte: lienKnown });
-  const renewal = renewalLane({ current: i.renewalStatus, release: i.releaseStatus, maturityDate: i.maturityDate, today: todayIso });
+  const validity = ["renewed", "replaced"].includes(i.renewalStatus) ? i.validityStatus : validityLane({ maturityDate: i.maturityDate, today: todayIso, lienIsAicte: lienKnown, issueDate: i.issueDate });
+  const renewal = renewalLane({ current: i.renewalStatus, release: i.releaseStatus, maturityDate: i.maturityDate, today: todayIso, issueDate: i.issueDate });
   const letters = await db
     .select({ response: schema.verifications.response })
     .from(schema.verifications)
@@ -119,6 +119,7 @@ export async function recomputeInstrument(instrumentId: string, actor: Actor, re
     releaseStatus: i.releaseStatus,
     maturityDate: i.maturityDate,
     openDiscrepancies: openCount,
+    issueDate: i.issueDate,
     discrepanciesAwaitingCheck: open.filter((o) => o.status === "resolved_pending_check").length,
     letterAwaitingCheck: letters.some((l) => !!(l.response as { letter?: unknown } | null)?.letter),
     today: todayIso,

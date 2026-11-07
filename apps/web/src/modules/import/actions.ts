@@ -212,8 +212,8 @@ export async function commitImport(fileName: string, rawRows: Record<string, str
       const caseNo = `FDR-${yy}-${String(++n).padStart(5, "0")}`;
       const lienKnown = v.lienHolder ? isAicteLien(v.lienHolder) : null;
       const record = r.status === "ok" ? "submitted" : "draft";
-      const validity = validityLane({ maturityDate: v.maturityDate ?? null, today: todayIso, lienIsAicte: lienKnown });
-      const renewal = renewalLane({ current: "not_due", release: "none", maturityDate: v.maturityDate ?? null, today: todayIso });
+      const validity = validityLane({ maturityDate: v.maturityDate ?? null, today: todayIso, lienIsAicte: lienKnown, issueDate: v.issueDate ?? null });
+      const renewal = renewalLane({ current: "not_due", release: "none", maturityDate: v.maturityDate ?? null, today: todayIso, issueDate: v.issueDate ?? null });
       const na =
         record === "draft"
           ? { text: "Complete the fields left unknown by the legacy import", due: todayIso }

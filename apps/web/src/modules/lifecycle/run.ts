@@ -19,6 +19,7 @@ type Row = {
   bank_name: string;
   amount_paise: string;
   maturity_date: string | null;
+  issue_date: string | null;
   lien_holder: string | null;
   record_status: string;
   verification_status: string;
@@ -82,7 +83,7 @@ export async function runLifecycle(todayIso: string, actor: Actor, opts: { reaso
 
   const rows = await db.execute<Row>(sql`
     select i.id, i.case_no, i.institution_id, n.name as institution, n.nodal_email, n.region_id, i.bank_name, i.amount_paise::text,
-      i.maturity_date::text, i.lien_holder, i.record_status, i.verification_status, i.validity_status, i.renewal_status, i.release_status,
+      i.maturity_date::text, i.issue_date::text, i.lien_holder, i.record_status, i.verification_status, i.validity_status, i.renewal_status, i.release_status,
       i.next_action, i.next_action_due::text, i.owner_user_id,
       (select count(*)::int from discrepancies x where x.instrument_id = i.id and x.status not in ('closed','dismissed')) as open_disc,
       (select count(*)::int from discrepancies x where x.instrument_id = i.id and x.status = 'resolved_pending_check') as awaiting_check,
@@ -99,8 +100,8 @@ export async function runLifecycle(todayIso: string, actor: Actor, opts: { reaso
   for (const r of rows) {
     const lienValues = (r.lien_values ?? []).filter((v): v is string => !!v);
     const lienKnown = lienValues.length ? lienValues.every(isAicteLien) : r.lien_holder ? isAicteLien(r.lien_holder) : null;
-    const validity = validityLane({ maturityDate: r.maturity_date, today: todayIso, lienIsAicte: lienKnown, graceDays: DEFAULT_REMINDER_RULES.renewalGraceDays });
-    const renewal = renewalLane({ current: r.renewal_status as never, release: r.release_status as never, maturityDate: r.maturity_date, today: todayIso });
+    const validity = validityLane({ maturityDate: r.maturity_date, today: todayIso, lienIsAicte: lienKnown, graceDays: DEFAULT_REMINDER_RULES.renewalGraceDays, issueDate: r.issue_date });
+    const renewal = renewalLane({ current: r.renewal_status as never, release: r.release_status as never, maturityDate: r.maturity_date, today: todayIso, issueDate: r.issue_date });
     const na = nextAction({
       recordStatus: r.record_status,
       verificationStatus: r.verification_status,
@@ -111,6 +112,7 @@ export async function runLifecycle(todayIso: string, actor: Actor, opts: { reaso
       openDiscrepancies: r.open_disc,
       discrepanciesAwaitingCheck: r.awaiting_check,
       letterAwaitingCheck: r.letter_waiting,
+      issueDate: r.issue_date,
       today: todayIso,
     });
     // Keep the due date of an unchanged action stable, so "due" does not drift each day.
@@ -121,7 +123,7 @@ export async function runLifecycle(todayIso: string, actor: Actor, opts: { reaso
       if (validity !== r.validity_status) ledger.push({ action: "lifecycle.validity", entityId: r.id, payload: { from: r.validity_status, to: validity, today: todayIso } });
       if (renewal !== r.renewal_status) ledger.push({ action: "lifecycle.renewal", entityId: r.id, payload: { from: r.renewal_status, to: renewal, today: todayIso } });
     }
-    const d = dueReminders({ maturityDate: r.maturity_date, renewalStatus: renewal, releaseStatus: r.release_status }, todayIso);
+    const d = dueReminders({ maturityDate: r.maturity_date, renewalStatus: renewal, releaseStatus: r.release_status, issueDate: r.issue_date }, todayIso);
     if (d.length) dues.set(r.id, d);
   }
 

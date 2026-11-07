@@ -58,7 +58,7 @@ export async function buildOrderPdf(o: OrderContent) {
   };
 
   // Watermark: this is a prototype artefact.
-  page.drawText("PROTOTYPE  SPECIMEN  NOT A VALID ORDER", { x: 90, y: 260, size: 30, font: bold, color: rgb(0.93, 0.85, 0.85), rotate: degrees(35), opacity: 0.6 });
+  page.drawText("PROTOTYPE  SPECIMEN  NOT A VALID ORDER", { x: 80, y: 190, size: 25, font: bold, color: rgb(0.93, 0.85, 0.85), rotate: degrees(35), opacity: 0.6 });
 
   text("NIDHIKAVACH  /  SECURITY DEPOSIT REGISTRY", { size: 8.5, f: bold, color: RED });
   y -= 16;

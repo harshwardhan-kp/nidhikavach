@@ -5,9 +5,10 @@
  * closure / merger with a university or board certificate; cl. 2.21(h)-(i)
  * closure penalties; Affidavit 6 conditions.
  */
-import { addDays } from "./lanes";
+import { holdEnds } from "./lanes";
 
-export const HOLD_YEARS = 10;
+export { HOLD_YEARS, holdEnds } from "./lanes";
+
 
 export type ReleaseKind = "release" | "refund";
 export const KIND_LABEL: Record<ReleaseKind, string> = {
@@ -36,12 +37,6 @@ export type ReleaseFacts = {
   attested?: Partial<Record<"cell_clearances" | "no_dues_or_penalty", boolean>>;
 };
 
-/** Same calendar date ten years on (29 Feb rolls to 1 Mar). */
-export function holdEnds(issueDate: string) {
-  const y = Number(issueDate.slice(0, 4)) + HOLD_YEARS;
-  const md = issueDate.slice(5);
-  return md === "02-29" ? addDays(`${y}-02-28`, 1) : `${y}-${md}`;
-}
 
 export function evaluateRelease(f: ReleaseFacts): Condition[] {
   const holdEnd = f.issueDate ? holdEnds(f.issueDate) : null;

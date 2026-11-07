@@ -7,7 +7,7 @@
  *   escalation ladder institution -> maker -> checker -> authority, one step
  *   every `stepAfterDays`.
  */
-import { addDays, daysBetween } from "./lanes";
+import { addDays, daysBetween, holdCompleteAtMaturity } from "./lanes";
 
 export type Audience = "institution" | "maker" | "checker" | "authority";
 export type DueReminder = { kind: "maturity" | "renewal_overdue"; offsetDays: number; level: number; dueOn: string; audience: Audience };
@@ -27,11 +27,13 @@ export const DEFAULT_REMINDER_RULES: ReminderRules = {
 };
 
 export function dueReminders(
-  i: { maturityDate: string | null; renewalStatus: string; releaseStatus: string },
+  i: { maturityDate: string | null; renewalStatus: string; releaseStatus: string; issueDate?: string | null },
   today: string,
   rules: ReminderRules = DEFAULT_REMINDER_RULES,
 ): DueReminder[] {
   if (!i.maturityDate) return [];
+  // Hold complete at maturity: the deposit goes back, so no renewal reminders.
+  if (holdCompleteAtMaturity(i.issueDate, i.maturityDate)) return [];
   if (["requested", "renewed", "replaced"].includes(i.renewalStatus)) return [];
   if (!["none", "rejected"].includes(i.releaseStatus)) return [];
   const out: DueReminder[] = [];

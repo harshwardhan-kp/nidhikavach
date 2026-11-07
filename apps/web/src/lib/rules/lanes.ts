@@ -20,16 +20,30 @@ export function addDays(iso: string, days: number) {
   return d.toISOString().slice(0, 10);
 }
 
+/** The ten-year hold (APH cl. 1.12(iv)) ends on the same calendar date ten years on. */
+export const HOLD_YEARS = 10;
+export function holdEnds(issueDate: string) {
+  const y = Number(issueDate.slice(0, 4)) + HOLD_YEARS;
+  const md = issueDate.slice(5);
+  return md === "02-29" ? addDays(`${y}-02-28`, 1) : `${y}-${md}`;
+}
+
+/** True when this FDR runs to (or past) the end of the hold: no renewal needed, release is next. */
+export function holdCompleteAtMaturity(issueDate: string | null | undefined, maturityDate: string | null | undefined) {
+  return !!issueDate && !!maturityDate && holdEnds(issueDate) <= maturityDate;
+}
+
 export function validityLane(args: {
   maturityDate: string | null;
   today: string;
   lienIsAicte: boolean | null; // null = not known yet
   graceDays?: number;
+  issueDate?: string | null;
 }): ValidityStatus {
   const grace = args.graceDays ?? 15;
   if (args.maturityDate) {
     const left = daysBetween(args.today, args.maturityDate);
-    if (left < -grace) return "expired";
+    if (left < -grace) return holdCompleteAtMaturity(args.issueDate, args.maturityDate) ? "matured" : "expired";
     if (left <= 0) return "matured";
     if (args.lienIsAicte === false || args.lienIsAicte === null) return "lien_unknown";
     if (left <= EXPIRING_WINDOW_DAYS) return "expiring";
@@ -44,9 +58,12 @@ export function renewalLane(args: {
   maturityDate: string | null;
   today: string;
   graceDays?: number;
+  issueDate?: string | null;
 }): RenewalStatus {
   // Explicit states set by actions are sticky.
   if (["requested", "renewed", "replaced"].includes(args.current)) return args.current;
+  // The hold ends with this FDR: it is released, not renewed.
+  if (holdCompleteAtMaturity(args.issueDate, args.maturityDate)) return "not_due";
   // A release in progress or done suspends renewal: the deposit is on its way back.
   if (args.release !== "none" && args.release !== "rejected") return "not_due";
   if (!args.maturityDate) return "not_due";

@@ -102,8 +102,8 @@ export async function submitInstrument(_prev: SubmitState, formData: FormData): 
     .limit(1);
 
   const lienIsAicte = isAicteLien(v.lienHolder);
-  const validity = validityLane({ maturityDate: v.maturityDate, today: todayIso, lienIsAicte });
-  const renewal = renewalLane({ current: "not_due", release: "none", maturityDate: v.maturityDate, today: todayIso });
+  const validity = validityLane({ maturityDate: v.maturityDate, today: todayIso, lienIsAicte, issueDate: v.issueDate });
+  const renewal = renewalLane({ current: "not_due", release: "none", maturityDate: v.maturityDate, today: todayIso, issueDate: v.issueDate });
   const na = nextAction({
     recordStatus: "submitted", verificationStatus: "unverified", validityStatus: validity, renewalStatus: renewal,
     releaseStatus: "none", maturityDate: v.maturityDate, openDiscrepancies: 0, today: todayIso,

@@ -308,6 +308,9 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
   // Left unread on purpose: the pitch runs Doc-AI, the tamper scan and the bank check on it live.
   base(demo, { caseNo: "FDR-26-05310", programme: "Diploma Electrical Engineering", rupees: 500000, issueDate: addDays(today, -9), maturityDate: addYears(addDays(today, -9), 5), record: "under_scrutiny", verification: "unverified", hasScan: false });
 
+  // Hold complete 12 days ago: the institution requests release live in the pitch.
+  base(demo, { caseNo: "FDR-16-03310", programme: "Diploma Mechanical Engineering", rupees: 1500000, issueDate: addYears(addDays(today, -12), -10), maturityDate: addDays(today, -12) });
+
   const pune = showcaseInst("Sahyadri Ridge Institute of Technology, Pune", "Pune", "Maharashtra", "engineering");
   base(pune, { caseNo: "FDR-26-03952", rupees: 2500000, issueDate: addDays(today, -120), maturityDate: addYears(addDays(today, -120), 10), record: "under_scrutiny", verification: "mismatch", anomaly: "amount_mismatch", discrepancyStatus: "open" });
 
@@ -417,13 +420,13 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
 
     const validity = l.historical
       ? "matured"
-      : validityLane({ maturityDate: l.maturityDate, today, lienIsAicte: l.anomaly === "lien_other" ? false : true });
-    const renewal = l.historical ? l.renewal : renewalLane({ current: l.renewal, release: l.release as never, maturityDate: l.maturityDate, today });
+      : validityLane({ maturityDate: l.maturityDate, today, lienIsAicte: l.anomaly === "lien_other" ? false : true, issueDate: l.issueDate });
+    const renewal = l.historical ? l.renewal : renewalLane({ current: l.renewal, release: l.release as never, maturityDate: l.maturityDate, today, issueDate: l.issueDate });
     const openDisc = l.discrepancyStatus ? 1 : 0;
     const na = l.historical ? null : nextAction({
       recordStatus: l.record, verificationStatus: l.verification, validityStatus: validity, renewalStatus: renewal,
       releaseStatus: l.release, maturityDate: l.maturityDate, openDiscrepancies: openDisc,
-      discrepanciesAwaitingCheck: l.discrepancyStatus === "resolved_pending_check" ? 1 : 0, today,
+      discrepanciesAwaitingCheck: l.discrepancyStatus === "resolved_pending_check" ? 1 : 0, issueDate: l.issueDate, today,
     });
     const isWro = regionCode.get(l.inst.regionId) === "WRO";
     const owner = !na ? null

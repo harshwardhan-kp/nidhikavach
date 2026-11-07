@@ -14,7 +14,7 @@ export const answerSchema = z.object({
 export type HandbookAnswer = z.infer<typeof answerSchema> & { notes: { id: string; clause: string; title: string; body: string }[]; cached: boolean };
 
 /** Nearest handbook notes by meaning (pgvector cosine). */
-export async function retrieve(question: string, k = 6) {
+export async function retrieve(question: string, k = 8) {
   const [v] = await embed([question]);
   const similarity = sql<number>`1 - (${cosineDistance(schema.ruleNotes.embedding, v)})`;
   return db

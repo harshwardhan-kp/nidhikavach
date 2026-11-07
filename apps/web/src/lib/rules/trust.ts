@@ -61,13 +61,14 @@ export function computeTrust(
       reason = s.declared?.trim() ? "only one source so far" : "not declared";
       points = s.declared?.trim() ? Math.round(max * 0.3) : 0;
     } else {
-      const soft = match === "soft_match" ? 0.9 : 1;
+      const soft = match === "soft_match" ? 0.95 : 1;
       if (hasBank) {
         points = max * soft;
         reason = match === "match" ? "bank confirms" : "bank confirms (formatting differs)";
       } else {
+        // Consistent but unconfirmed reaches the no-bank cap (amber), never green.
         const conf = s.scanConfidence ?? 1;
-        points = max * 0.6 * soft * (conf < 0.6 ? 0.5 : 1);
+        points = max * 0.75 * soft * (conf < 0.6 ? 0.5 : 1);
         reason = conf < 0.6 ? "scan agrees, low read confidence" : "scan agrees, bank not yet confirmed";
       }
     }
@@ -77,7 +78,7 @@ export function computeTrust(
   const lien = inputs.lienHolder;
   const lienValues = [lien?.declared, lien?.scan, lien?.bank].filter((v): v is string => !!v?.trim());
   if (lienValues.length && lienValues.some((v) => !isAicteLien(v))) {
-    penalties.push({ reason: "Lien is not marked in favour of AICTE", points: 15 });
+    penalties.push({ reason: "Lien is not marked in favour of AICTE", points: 30 });
   }
 
   if (!anyScan && !anyBank) {

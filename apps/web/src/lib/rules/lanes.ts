@@ -47,7 +47,8 @@ export function renewalLane(args: {
 }): RenewalStatus {
   // Explicit states set by actions are sticky.
   if (["requested", "renewed", "replaced"].includes(args.current)) return args.current;
-  if (["approved", "released", "refunded"].includes(args.release)) return "not_due";
+  // A release in progress or done suspends renewal: the deposit is on its way back.
+  if (args.release !== "none" && args.release !== "rejected") return "not_due";
   if (!args.maturityDate) return "not_due";
   const left = daysBetween(args.today, args.maturityDate);
   if (left < -(args.graceDays ?? 15)) return "overdue";

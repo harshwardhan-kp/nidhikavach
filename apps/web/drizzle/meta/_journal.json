@@ -15,6 +15,20 @@
       "when": 1794040127471,
       "tag": "0001_audit_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794041709939,
+      "tag": "0002_ifsc_and_specimen",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794041926736,
+      "tag": "0003_release_requested_by_nullable",
+      "breakpoints": true
     }
   ]
 }

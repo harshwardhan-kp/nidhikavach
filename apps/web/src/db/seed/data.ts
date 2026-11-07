@@ -58,7 +58,7 @@ export const DEMO_PASSWORD = "nidhikavach-demo-2026";
 
 export const DEMO_INSTITUTION = {
   aicteId: "1-2611045671",
-  name: "Govt. Polytechnic, Nagpur",
+  name: "Deccan Plateau Polytechnic, Nagpur",
   kind: "polytechnic",
   ownership: "government",
   state: "Maharashtra",
@@ -67,7 +67,7 @@ export const DEMO_INSTITUTION = {
 } as const;
 
 export const DEMO_USERS = [
-  { key: "institution", email: "nodal.gpnagpur@demo.nidhikavach.in", name: "Meera Joshi", designation: "Nodal officer, Govt. Polytechnic, Nagpur", roles: ["institution"], region: "WRO", institution: true },
+  { key: "institution", email: "nodal.gpnagpur@demo.nidhikavach.in", name: "Meera Joshi", designation: "Nodal officer, Deccan Plateau Polytechnic, Nagpur", roles: ["institution"], region: "WRO", institution: true },
   { key: "maker", email: "dealing.wro@demo.nidhikavach.in", name: "Rohan Kulkarni", designation: "Assistant Director (dealing officer), Western Regional Office", roles: ["maker"], region: "WRO" },
   { key: "checker", email: "rd.wro@demo.nidhikavach.in", name: "Sunita Iyer", designation: "Regional Officer, Western Regional Office", roles: ["checker"], region: "WRO" },
   { key: "authority", email: "advisor.rb@demo.nidhikavach.in", name: "Dr. Arvind Menon", designation: "Advisor, Regulation Bureau, AICTE HQ", roles: ["authority"], region: null },

@@ -191,6 +191,19 @@ export const userRoles = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.role] })],
 );
 
+/** Bank branches (real data from Razorpay's open IFSC dataset), cached for validation and seeding. */
+export const ifscBranches = pgTable("ifsc_branches", {
+  ifsc: text("ifsc").primaryKey(),
+  bank: text("bank").notNull(),
+  bankCode: text("bank_code").notNull(),
+  branch: text("branch").notNull(),
+  city: text("city"),
+  district: text("district"),
+  state: text("state"),
+  address: text("address"),
+  fetchedAt: ts("fetched_at").notNull().defaultNow(),
+});
+
 /* ----------------------------------------------------------- instruments -- */
 
 export const ruleSets = pgTable("rule_sets", {
@@ -303,6 +316,8 @@ export const documents = pgTable(
     tamperScore: integer("tamper_score"),
     tamperFindings: jsonb("tamper_findings"),
     synthetic: boolean("synthetic").notNull().default(false),
+    // For synthetic seed scans: what the sidecar should render (fields + variant). Null for real uploads.
+    specimen: jsonb("specimen"),
   },
   (t) => [index("documents_instrument_idx").on(t.instrumentId)],
 );
@@ -386,9 +401,7 @@ export const releaseRequests = pgTable(
     reason: text("reason").notNull(),
     conditions: jsonb("conditions"), // checklist evaluated from the rule set
     state: releaseStatusEnum("state").notNull().default("requested"),
-    requestedBy: uuid("requested_by")
-      .notNull()
-      .references(() => users.id),
+    requestedBy: uuid("requested_by").references(() => users.id), // null for requests imported from the legacy register
     requestedAt: ts("requested_at").notNull().defaultNow(),
     decidedAt: ts("decided_at"),
     orderNo: text("order_no").unique(),

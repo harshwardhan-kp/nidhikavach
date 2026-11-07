@@ -17,6 +17,7 @@
     "@node-rs/argon2": "^2.2.2",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.4",
+    "ifsc": "^2.0.50",
     "jose": "^6.2.15",
     "lucide-react": "^1.70.0",
     "next": "16.4.5",

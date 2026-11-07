@@ -48,6 +48,11 @@ describe("trust score", () => {
     expect(t.score).toBeLessThanOrEqual(70);
   });
 
+  it("keeps a consistent but unconfirmed record amber, not red", () => {
+    const noBank = Object.fromEntries(Object.entries(perfect).map(([k, v]) => [k, { ...v, bank: null }]));
+    expect(computeTrust(noBank).band).toBe("amber");
+  });
+
   it("goes red when the bank disagrees on the amount", () => {
     const t = computeTrust({ ...perfect, amount: { declared: "1000000", scan: "1000000", bank: "100000" } });
     expect(t.band).not.toBe("green");
@@ -88,7 +93,8 @@ describe("lanes", () => {
     expect(renewalLane({ ...base, maturityDate: addDays(today, -30) })).toBe("overdue");
     expect(renewalLane({ ...base, current: "renewed", maturityDate: addDays(today, -30) })).toBe("renewed");
   });
-  it("never makes a released deposit due for renewal", () => {
+  it("never makes a released or releasing deposit due for renewal", () => {
     expect(renewalLane({ current: "not_due", release: "released", maturityDate: addDays(today, 10), today })).toBe("not_due");
+    expect(renewalLane({ current: "not_due", release: "checked", maturityDate: addDays(today, -60), today })).toBe("not_due");
   });
 });

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Button, Card, PageHeader, Simulated } from "@/components/ui";
 import { requirePermission } from "@/lib/auth/session";
 import { getClockOffsetDays, istDate, today } from "@/lib/clock";
@@ -47,6 +48,18 @@ export default async function AdminPage() {
             </Button>
           </form>
         </div>
+      </Card>
+      <Card className="mt-4 max-w-[640px] p-5">
+        <div className="flex items-center gap-2">
+          <span className="kicker">mock bank</span>
+          <Simulated what="demo only" />
+        </div>
+        <p className="mt-2 text-[13px] text-txt">
+          Book deposits as a bank branch would, so the Account Aggregator and NeSL answers in the demo come from a real record.
+        </p>
+        <Link href="/app/admin/bank" className="mt-3 inline-block rounded-[10px] bg-ink-2 px-4 py-2 font-mono text-[13px] text-white hover:opacity-85">
+          [open the teller]
+        </Link>
       </Card>
     </>
   );

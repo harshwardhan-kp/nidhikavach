@@ -18,6 +18,7 @@ import { documentUrl } from "@/modules/documents/view";
 import { signedGetUrl, type TamperFinding } from "@/lib/sidecar";
 import type { TamperOpinion } from "@/modules/verify/vision";
 import { ActionsPanel, type PendingLetter } from "./actions-panel";
+import { CaseBrief, DraftPanel } from "./assist";
 import { AutoRefresh } from "./auto-refresh";
 import { DiscrepancyControls } from "./discrepancy-item";
 import { RiskLine, RiskLineSkeleton } from "./risk-line";
@@ -446,6 +447,11 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">
+          {can(user.roles, "reports.view") ? (
+            <Section title="case brief" aside={<span className="tag">[a4 · cited]</span>}>
+              <CaseBrief caseNo={i.caseNo} />
+            </Section>
+          ) : null}
           {trust && (i.riskBand === "red" || i.riskBand === "amber") ? (
             <Section title="why this case needs attention" aside={<span className="tag">[gpt-6-luna · from the record]</span>} className={i.riskBand === "red" ? "border-red/40" : "border-amber/40"}>
               <Suspense fallback={<RiskLineSkeleton />}>
@@ -480,6 +486,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
                 can={perms}
                 hasScan={!!scan}
                 scanRead={hasReading}
+                scanChecked={scan?.doc.extractionStatus === "done"}
                 scanRunning={scan?.doc.extractionStatus === "running"}
                 recordStatus={i.recordStatus}
                 verificationStatus={i.verificationStatus}
@@ -487,6 +494,15 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
                 letterNeeded={letterRows.length > 0 && !letterRow}
                 pendingLetter={pendingLetter}
                 declared={{ amount: declared.amount ?? "", maturityDate: declared.maturityDate ?? "", lienHolder: declared.lienHolder ?? "" }}
+              />
+            </Section>
+          ) : null}
+
+          {perms.scrutinise || perms.confirm || can(user.roles, "release.approve") ? (
+            <Section title="draft a letter" aside={<span className="tag">[a6 · en / hi]</span>}>
+              <DraftPanel
+                caseNo={i.caseNo}
+                suggested={i.renewalStatus === "overdue" ? "escalation_note" : c.openDiscrepancies ? "discrepancy_letter" : "bank_request"}
               />
             </Section>
           ) : null}
@@ -582,7 +598,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
           <Section title="audit trail" aside={<span className="tag">[hash-chained]</span>}>
             <ol className="flex flex-col gap-2.5">
               {c.ledger.map(({ e, actor }) => (
-                <li key={e.seq} className="border-l-2 border-line pl-3">
+                <li key={e.seq} id={`ledger-${e.seq}`} className="scroll-mt-24 border-l-2 border-line pl-3 target:border-red target:bg-red-soft/40">
                   <div className="text-[12.5px]">
                     <span className="font-mono">{e.action}</span> <span className="text-txt">by {actor ?? e.actorRole ?? "system"}</span>
                   </div>

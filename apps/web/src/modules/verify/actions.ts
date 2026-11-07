@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { and, eq, notInArray } from "drizzle-orm";
+import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -139,6 +139,11 @@ async function completeRenewal(i: typeof schema.instruments.$inferSelect, user: 
 export async function acceptRecordAction(caseNo: string) {
   return run(caseNo, "instrument.scrutinise", async (user, i) => {
     if (!["bank_confirmed", "manual_confirmed"].includes(i.verificationStatus)) throw new Error("The bank has not confirmed this instrument yet");
+    const unread = await db
+      .select({ id: schema.documents.id })
+      .from(schema.documents)
+      .where(and(eq(schema.documents.instrumentId, i.id), inArray(schema.documents.kind, ["fdr_scan", "renewal_scan"]), notInArray(schema.documents.extractionStatus, ["done"])));
+    if (unread.length) throw new Error("Read the scan first: both readers must see it before the record is accepted");
     const open = await db
       .select({ id: schema.discrepancies.id })
       .from(schema.discrepancies)

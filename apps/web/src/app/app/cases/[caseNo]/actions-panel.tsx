@@ -24,6 +24,8 @@ type Props = {
   can: { scrutinise: boolean; request: boolean; confirm: boolean; raise: boolean };
   hasScan: boolean;
   scanRead: boolean;
+  /** Read at some point (seeded history counts), which is what acceptance requires. */
+  scanChecked: boolean;
   scanRunning: boolean;
   recordStatus: string;
   verificationStatus: string;
@@ -92,7 +94,7 @@ export function ActionsPanel(p: Props) {
 
   const closed = ["accepted", "rejected"].includes(p.recordStatus);
   const bankDone = ["bank_confirmed", "manual_confirmed"].includes(p.verificationStatus);
-  const acceptBlock = !bankDone ? "the bank has not confirmed it yet" : p.openDiscrepancies ? `${p.openDiscrepancies} discrepanc${p.openDiscrepancies > 1 ? "ies are" : "y is"} still open` : null;
+  const acceptBlock = p.hasScan && !p.scanChecked ? "the scan has not been read" : !bankDone ? "the bank has not confirmed it yet" : p.openDiscrepancies ? `${p.openDiscrepancies} discrepanc${p.openDiscrepancies > 1 ? "ies are" : "y is"} still open` : null;
   const any = p.can.scrutinise || p.can.request || p.can.confirm;
 
   if (!any) {
@@ -177,7 +179,7 @@ export function ActionsPanel(p: Props) {
             ) : null}
           </div>
         ) : null}
-        {p.can.scrutinise && !closed && acceptBlock ? <p className="tag">[accept unlocks once {acceptBlock.replace("the bank has not confirmed it yet", "the bank confirms")}]</p> : null}
+        {p.can.scrutinise && !closed && acceptBlock ? <p className="tag">[accept unlocks once {acceptBlock.replace("the bank has not confirmed it yet", "the bank confirms").replace("the scan has not been read", "the scan is read")}]</p> : null}
       </div>
 
       {form === "letter" ? <LetterForm caseNo={p.caseNo} declared={p.declared} pending={pending} busy={busy} go={go} /> : null}

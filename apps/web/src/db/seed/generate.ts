@@ -305,10 +305,10 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
   base(demo, { caseNo: "FDR-26-05310", programme: "Diploma Electrical Engineering", rupees: 500000, issueDate: addDays(today, -9), maturityDate: addYears(addDays(today, -9), 5), record: "under_scrutiny", verification: "unverified", hasScan: false });
 
   const pune = showcaseInst("Sahyadri Ridge Institute of Technology, Pune", "Pune", "Maharashtra", "engineering");
-  base(pune, { caseNo: "FDR-26-03952", rupees: 2500000, issueDate: addDays(today, -120), maturityDate: addYears(addDays(today, -120), 10), verification: "mismatch", anomaly: "amount_mismatch", discrepancyStatus: "open" });
+  base(pune, { caseNo: "FDR-26-03952", rupees: 2500000, issueDate: addDays(today, -120), maturityDate: addYears(addDays(today, -120), 10), record: "under_scrutiny", verification: "mismatch", anomaly: "amount_mismatch", discrepancyStatus: "open" });
 
   const ratnagiri = showcaseInst("Konkan Coast College of Pharmacy, Ratnagiri", "Ratnagiri", "Maharashtra", "pharmacy");
-  const oldC = base(ratnagiri, { caseNo: "FDR-23-11820", programme: "B.Pharm", issueDate: addYears(addDays(today, -5), -3), maturityDate: addDays(today, -5), historical: true, renewal: "renewed" }) as LinkSpec & { id: string };
+  const oldC = base(ratnagiri, { caseNo: "FDR-23-11820", programme: "B.Pharm", issueDate: addYears(addDays(today, -5), -3), maturityDate: addDays(today, -5), renewal: "requested" }) as LinkSpec & { id: string };
   base(ratnagiri, { caseNo: "FDR-26-05402", programme: "B.Pharm", issueDate: addDays(today, -3), maturityDate: addYears(addDays(today, -3), 3), replaces: oldC.id, record: "submitted", verification: "unverified", hasScan: false });
 
   const surat = showcaseInst("Tapti River Institute of Management, Surat", "Surat", "Gujarat", "management");
@@ -321,7 +321,7 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
   });
 
   const jalgaon = showcaseInst("Vindhya Range Engineering College, Jalgaon", "Jalgaon", "Maharashtra", "engineering");
-  base(jalgaon, { caseNo: "FDR-26-05811", rupees: 1000000, issueDate: addDays(today, -70), maturityDate: addYears(addDays(today, -70), 10), verification: "unavailable", anomaly: "no_bank_record", discrepancyStatus: "open" });
+  base(jalgaon, { caseNo: "FDR-26-05811", rupees: 1000000, issueDate: addDays(today, -70), maturityDate: addYears(addDays(today, -70), 10), record: "under_scrutiny", verification: "unavailable", anomaly: "no_bank_record", discrepancyStatus: "open" });
 
   // ---- materialise rows
   const sortedLinks = [...links].sort((a, b) => a.issueDate.localeCompare(b.issueDate));

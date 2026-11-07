@@ -13,6 +13,9 @@ export const FIELDS = [
   { key: "autoRenew", label: "Auto-renewal", critical: false },
 ] as const;
 
+/** Standard lien wording for AICTE security deposits. */
+export const LIEN_TEXT = "Member Secretary, AICTE, New Delhi";
+
 export type FieldKey = (typeof FIELDS)[number]["key"];
 export type Match = "match" | "soft_match" | "mismatch" | "missing";
 

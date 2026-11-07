@@ -6,7 +6,7 @@
  * Everything here is fictional except bank branches, which are real IFSC
  * records from Razorpay's open dataset (ifsc-sample.json).
  */
-import { FIELDS, type FieldKey, matchField } from "../../lib/rules/fields";
+import { FIELDS, type FieldKey, LIEN_TEXT, matchField } from "../../lib/rules/fields";
 import { addDays, daysBetween, renewalLane, validityLane, type RenewalStatus } from "../../lib/rules/lanes";
 import { nextAction } from "../../lib/rules/next-action";
 import { computeTrust, type FieldInput } from "../../lib/rules/trust";
@@ -93,7 +93,6 @@ const REGION_WEIGHT: Record<string, number> = { NRO: 200, NWRO: 170, WRO: 220, C
 // Banks treated as live on the (simulated) Account Aggregator rail; others confirm by letter.
 const AA_LIVE = new Set(["SBIN", "HDFC", "ICIC", "UTIB", "KKBK", "BARB", "PUNB", "CNRB", "UBIN"]);
 
-export const LIEN_TEXT = "Member Secretary, AICTE, New Delhi";
 
 const title = (s: string) => s.toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase());
 

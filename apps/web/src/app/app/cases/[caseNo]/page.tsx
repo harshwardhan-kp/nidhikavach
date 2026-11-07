@@ -1,9 +1,10 @@
-import { ArrowLeft, ExternalLink, FileWarning } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, FileWarning } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DaysLeft, LanePill, TrustMeter } from "@/components/case-ui";
 import { Card, Pill, Simulated } from "@/components/ui";
+import { can } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/session";
 import { today } from "@/lib/clock";
 import { FIELD_LABEL, FIELDS, type FieldKey } from "@/lib/rules/fields";
@@ -35,9 +36,10 @@ function Section({ title, aside, children, className }: { title: string; aside?:
   );
 }
 
-export default async function CasePage({ params }: PageProps<"/app/cases/[caseNo]">) {
+export default async function CasePage({ params, searchParams }: PageProps<"/app/cases/[caseNo]">) {
   const user = await requireUser();
   const { caseNo } = await params;
+  const { submitted } = await searchParams;
   const c = await getCase(user, decodeURIComponent(caseNo));
   if (!c) notFound();
   const todayIso = await today();
@@ -55,8 +57,26 @@ export default async function CasePage({ params }: PageProps<"/app/cases/[caseNo
     ["release", i.releaseStatus],
   ] as const;
 
+  const canRenew = can(user.roles, "renewal.request") && ["due", "overdue"].includes(i.renewalStatus);
+
   return (
     <div className="flex flex-col gap-4">
+      {submitted ? (
+        <div role="status" className="flex items-center gap-2 rounded-[12px] border border-green/40 bg-green-soft px-4 py-3 text-[13px]">
+          <CheckCircle2 size={16} className="text-green" />
+          <span>
+            Submitted as <b className="font-mono">{i.caseNo}</b>. The dealing officer has been notified; the scan goes to Doc-AI next.
+          </span>
+        </div>
+      ) : null}
+      {canRenew ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-amber/40 bg-amber-soft px-4 py-3 text-[13px]">
+          <span>This deposit matures on {formatDate(i.maturityDate)}. Submit the renewed or replacement FDR to keep the security deposit valid.</span>
+          <Link href={`/app/submit?renews=${i.caseNo}`} className="rounded-[9px] bg-ink-2 px-3 py-1.5 font-mono text-[12px] text-white hover:opacity-85">
+            [submit renewal]
+          </Link>
+        </div>
+      ) : null}
       <div>
         <Link href="/app/cases" className="tag inline-flex items-center gap-1 text-[12px] hover:text-ink">
           <ArrowLeft size={12} /> [cases]

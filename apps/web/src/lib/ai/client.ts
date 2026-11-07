@@ -99,3 +99,67 @@ export async function embed(texts: string[]): Promise<number[][]> {
   const res = await openai().embeddings.create({ model: MODELS.embedding, input: texts });
   return res.data.sort((a, b) => a.index - b.index).map((d) => d.embedding);
 }
+
+export type ToolDef = { name: string; description: string; parameters: Record<string, unknown>; run: (args: Record<string, unknown>) => Promise<unknown> };
+
+/**
+ * A tool-using conversation (A5): the model may call only the tools given,
+ * each bound server-side to one record. Logged to ai_calls like every call.
+ */
+export async function runWithTools(call: {
+  feature: AiFeature;
+  model: string;
+  instructions: string;
+  messages: { role: "user" | "assistant"; content: string }[];
+  tools: ToolDef[];
+  actorId?: string | null;
+  instrumentId?: string | null;
+  maxSteps?: number;
+}) {
+  const t0 = Date.now();
+  const used: string[] = [];
+  const input: OpenAI.Responses.ResponseInput = call.messages.map((m) => ({ role: m.role, content: m.content }));
+  const tools = call.tools.map((t) => ({ type: "function" as const, name: t.name, description: t.description, parameters: t.parameters, strict: true }));
+  let inTok = 0;
+  let outTok = 0;
+  try {
+    for (let step = 0; step < (call.maxSteps ?? 5); step++) {
+      const res = await openai().responses.create({ model: call.model, instructions: call.instructions, input, tools, reasoning: { effort: "low" } });
+      inTok += res.usage?.input_tokens ?? 0;
+      outTok += res.usage?.output_tokens ?? 0;
+      const calls = res.output.filter((o): o is OpenAI.Responses.ResponseFunctionToolCall => o.type === "function_call");
+      if (!calls.length) {
+        const answer = res.output_text;
+        await db.insert(schema.aiCalls).values({
+          feature: call.feature,
+          model: call.model,
+          inputHash: createHash("sha256").update(JSON.stringify(call.messages)).digest("hex"),
+          output: { answer, tools: used },
+          inputTokens: inTok,
+          outputTokens: outTok,
+          latencyMs: Date.now() - t0,
+          actorId: call.actorId ?? null,
+          instrumentId: call.instrumentId ?? null,
+        });
+        return { answer, tools: used };
+      }
+      // Carry the reasoning and function calls forward so the model sees its own steps.
+      input.push(...(res.output as OpenAI.Responses.ResponseInputItem[]));
+      for (const c of calls) {
+        const tool = call.tools.find((t) => t.name === c.name);
+        used.push(c.name);
+        let output: unknown;
+        try {
+          output = tool ? await tool.run(JSON.parse(c.arguments || "{}")) : { error: "unknown tool" };
+        } catch (e) {
+          output = { error: e instanceof Error ? e.message : "tool failed" };
+        }
+        input.push({ type: "function_call_output", call_id: c.call_id, output: JSON.stringify(output) });
+      }
+    }
+    throw new Error("Too many steps without an answer");
+  } catch (e) {
+    await db.insert(schema.aiCalls).values({ feature: call.feature, model: call.model, inputHash: "-", error: (e instanceof Error ? e.message : String(e)).slice(0, 500), latencyMs: Date.now() - t0, actorId: call.actorId ?? null, instrumentId: call.instrumentId ?? null });
+    throw e;
+  }
+}

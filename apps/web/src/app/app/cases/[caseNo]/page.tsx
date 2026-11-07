@@ -18,6 +18,7 @@ import { documentUrl } from "@/modules/documents/view";
 import { signedGetUrl, type TamperFinding } from "@/lib/sidecar";
 import type { TamperOpinion } from "@/modules/verify/vision";
 import { ActionsPanel, type PendingLetter } from "./actions-panel";
+import { AskCase } from "./ask-case";
 import { CaseBrief, DraftPanel } from "./assist";
 import { AutoRefresh } from "./auto-refresh";
 import { DiscrepancyControls } from "./discrepancy-item";
@@ -419,6 +420,11 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
           {can(user.roles, "reports.view") ? (
             <Section title="case brief" aside={<span className="tag">[a4 · cited]</span>}>
               <CaseBrief caseNo={i.caseNo} />
+            </Section>
+          ) : null}
+          {can(user.roles, "reports.view") ? (
+            <Section title="ask this case" aside={<span className="tag">[a5]</span>}>
+              <AskCase caseNo={i.caseNo} />
             </Section>
           ) : null}
           {trust && (i.riskBand === "red" || i.riskBand === "amber") ? (

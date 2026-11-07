@@ -5,6 +5,7 @@ import { db, schema } from "@/db";
 import { can } from "@/lib/auth/roles";
 import { requirePermission } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/utils";
+import { TamperDemo } from "./tamper-demo";
 import { VerifyButton } from "./verify-button";
 
 export const metadata: Metadata = { title: "Audit ledger" };
@@ -23,6 +24,13 @@ export default async function AuditPage() {
       <PageHeader title="audit" italic="ledger" sub="[append-only · sha-256 hash-chained · latest 200 entries]">
         {can(user.roles, "ledger.verify") ? <VerifyButton /> : null}
       </PageHeader>
+      {can(user.roles, "ledger.verify") ? (
+        <Card className="mb-4 p-5">
+          <div className="kicker">tamper test</div>
+          <p className="mt-1.5 mb-3 text-[13px] text-txt">Try to change the amount in a past entry and see the two layers that stop it.</p>
+          <TamperDemo />
+        </Card>
+      ) : null}
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[860px] text-left text-[13px]">
           <thead>

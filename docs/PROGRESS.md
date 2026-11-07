@@ -1,6 +1,6 @@
 # NidhiKavach build progress (handoff)
 
-Last updated: 7 Nov 2026 (P4 done). Branch `prototype` (pushed). Plan: [`BUILD_PLAN.md`](BUILD_PLAN.md).
+Last updated: 7 Nov 2026 (P5 done). Branch `prototype` (pushed). Plan: [`BUILD_PLAN.md`](BUILD_PLAN.md).
 
 ## Done
 
@@ -31,14 +31,22 @@ Last updated: 7 Nov 2026 (P4 done). Branch `prototype` (pushed). Plan: [`BUILD_P
   - A7 `/app/rules`: 20 paraphrased, clause-referenced notes (`db/seed/rule-notes.ts`) embedded with text-embedding-3-small into `rule_notes` (pgvector); `gpt-6.1-terra` answers only from retrieved notes (+ case facts and checklist when opened from a case), with verdict, citations and checks. The 2026-27 addendum was not reviewed (Firecrawl credits ran out).
   - Seed: showcase FDR-16-03310 (demo institution, hold complete 12 days ago) for the live request; FDR-16-07734 waits at the authority. `npm run db:reseed` = seed + `db:assets` (shared synthetic dossier, write-once on the sidecar) + `db:rules` + `db:lifecycle --silent`.
 
-## Next: P5 dashboard + reports (BUILD_PLAN §7 "Dashboard + reports", "Plain-language search", "Metrics"; §7a A3, A5, A10)
+- **P5 oversight** (done 7 Nov):
+  - Overview (HQ roles): region table (`modules/oversight/queries.ts`) and A10 weekly bureau briefing (`modules/assist/briefing.ts`, gpt-6.1-terra, aggregates only, cached by facts so it changes with data and the demo clock).
+  - Reports `/app/reports`: registry, maturing in 90 days, renewals overdue, discrepancy ageing, releases; scoped SQL in `modules/oversight/reports.ts`; export route `/app/reports/[id]/export?format=csv|pdf` (pdf-lib landscape table), each export on the ledger.
+  - A3 search: `components/ask-bar.tsx` in the top bar → `askSearchAction` (gpt-6-luna, allow-listed schema in `modules/assist/search.ts`) → `/app/cases?...&ask=` with removable chips (`cases/ask-chips.tsx`). New case filters: `within`, `maturedAgo`, `minLakh`.
+  - A5 ask-this-case: `runWithTools` in `lib/ai/client.ts` (Responses API function calling, logged to ai_calls) + 8 read-only tools bound to one case (`modules/assist/ask-case.ts`); chat panel `cases/[caseNo]/ask-case.tsx`.
+  - Audit: tamper test (`audit/tamper-demo.tsx`): the DB refuses the UPDATE and the recomputed hash differs.
+  - Metrics `/app/metrics`: six PS scenarios, written manual baseline vs live measurements (`modules/oversight/metrics.ts`); live bank timings come from ledger pairs so seeded rows do not skew them.
+  - Seed: open discrepancies on old FDRs are now recent (9-36 days), not dated to submission.
 
-1. Overview per the deck mock: KPIs, cases needing action, maturity forecast, region view for HQ roles.
-2. Five reports with CSV / PDF export (registry, maturity, renewals overdue, discrepancies ageing, releases).
-3. A3 plain-language search in the top bar (`gpt-6-luna` → allow-listed filter chips → /app/cases).
-4. A5 "ask this case" chat (read-only tools) and A10 weekly bureau briefing (regenerated on clock move).
-5. Metrics page: the six scenarios before/after vs a written manual baseline.
-6. Tests, build, reseed, deploy, browser-verify, commit + push, mark P5 done.
+## Next: P6 demo polish (BUILD_PLAN §10, §11)
+
+1. Six Playwright scenarios against the deployed site (`e2e/`), also the demo script; record for the video.
+2. Hindi toggle on key screens (institution submit, case page header, letters already bilingual).
+3. Security & compliance page (BUILD_PLAN §8: DPDP 2023, IT Act eSign, CERT-In, GIGW) and an integrations status page (AA, NeSL, Doc-AI, eSign: real vs simulated).
+4. README, landing page and deck refresh; demo script doc.
+5. Final reseed, deploy, full browser pass.
 
 ## Working notes
 

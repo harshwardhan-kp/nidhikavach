@@ -14,6 +14,7 @@ export const NAV: NavItem[] = [
   { href: "/app/releases", label: "releases", icon: "handshake", perm: "reports.view" },
   { href: "/app/rules", label: "ask the handbook", icon: "book", perm: "reports.view" },
   { href: "/app/reports", label: "reports", icon: "chart", perm: "reports.view" },
+  { href: "/app/metrics", label: "metrics", icon: "gauge", perm: "reports.view" },
   { href: "/app/inbox", label: "inbox", icon: "bell" },
   { href: "/app/outbox", label: "email outbox", icon: "mail" },
   { href: "/app/audit", label: "audit ledger", icon: "link", perm: "ledger.view" },

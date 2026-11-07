@@ -177,3 +177,17 @@ export async function askSearchAction(question: string) {
     return { ok: false as const, message: e instanceof Error ? e.message : "The model is unavailable" };
   }
 }
+
+/** A5: one turn of the ask-this-case chat. */
+export async function askCaseAction(caseNo: string, messages: { role: "user" | "assistant"; content: string }[]) {
+  const { user, c } = await load(caseNo);
+  if (!can(user.roles, "reports.view")) return { ok: false as const, message: "Ask-this-case is for officers" };
+  const v = z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(4000) })).min(1).max(20).safeParse(messages);
+  if (!v.success || v.data.at(-1)?.role !== "user") return { ok: false as const, message: "Ask a question" };
+  try {
+    const r = await (await import("./ask-case")).askCase(c, await today(), v.data, user.id);
+    return { ok: true as const, answer: r.answer, tools: [...new Set(r.tools)] };
+  } catch (e) {
+    return { ok: false as const, message: e instanceof Error ? e.message : "The model is unavailable" };
+  }
+}

@@ -24,6 +24,14 @@ export const caseFilterSchema = z.object({
   release: lane(LANE_VALUES.release),
   region: z.coerce.number().int().positive().optional().catch(undefined),
   sort: z.enum(["risk", "maturity", "amount", "recent"]).optional().catch(undefined),
+  /** Matures within this many days from today (demo clock). */
+  within: z.coerce.number().int().min(1).max(3650).optional().catch(undefined),
+  /** Matured at least this many days ago. */
+  maturedAgo: z.coerce.number().int().min(0).max(3650).optional().catch(undefined),
+  /** Amount at least this many lakh rupees. */
+  minLakh: z.coerce.number().min(0).max(100000).optional().catch(undefined),
+  /** Plain-language question that produced these filters (A3), shown back to the user. */
+  ask: z.string().trim().max(200).optional().catch(undefined),
   page: z.coerce.number().int().min(1).max(500).optional().catch(undefined),
 });
 export type CaseFilters = z.infer<typeof caseFilterSchema>;
@@ -33,7 +41,7 @@ const closed = or(inArray(I.renewalStatus, ["renewed", "replaced"]), inArray(I.r
 
 const riskOrder = sql`case ${I.riskBand} when 'red' then 0 when 'amber' then 1 when 'unscored' then 2 else 3 end`;
 
-function conditions(user: SessionUser, f: CaseFilters): SQL[] {
+function conditions(user: SessionUser, f: CaseFilters, today?: string): SQL[] {
   const c: SQL[] = [];
   const scope = instrumentScope(user);
   if (scope) c.push(scope);
@@ -52,11 +60,15 @@ function conditions(user: SessionUser, f: CaseFilters): SQL[] {
   if (f.renewal) c.push(eq(I.renewalStatus, f.renewal as never));
   if (f.release) c.push(eq(I.releaseStatus, f.release as never));
   if (f.region) c.push(eq(Inst.regionId, f.region));
+  const t = today ?? new Date().toISOString().slice(0, 10);
+  if (f.within) c.push(sql`${I.maturityDate} between ${t}::date and ${t}::date + ${f.within}::int`);
+  if (f.maturedAgo != null) c.push(sql`${I.maturityDate} <= ${t}::date - ${f.maturedAgo}::int`);
+  if (f.minLakh) c.push(sql`${I.amountPaise} >= ${Math.round(f.minLakh * 1e7)}`);
   return c;
 }
 
-export async function listCases(user: SessionUser, f: CaseFilters) {
-  const where = and(...conditions(user, f));
+export async function listCases(user: SessionUser, f: CaseFilters, today?: string) {
+  const where = and(...conditions(user, f, today));
   const page = f.page ?? 1;
   const order =
     f.sort === "maturity"

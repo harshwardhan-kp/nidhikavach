@@ -10,6 +10,7 @@ import { formatDate, formatPaise } from "@/lib/utils";
 import { TYPE_LABEL } from "@/modules/cases/labels";
 import { caseFilterSchema, listCases, regionsList } from "@/modules/cases/queries";
 import { scopeLabel } from "@/modules/cases/scope";
+import { AskChips } from "./ask-chips";
 import { FilterBar } from "./filter-bar";
 
 export const metadata: Metadata = { title: "Cases" };
@@ -19,11 +20,8 @@ export default async function CasesPage({ searchParams }: PageProps<"/app/cases"
   const raw = await searchParams;
   const flat = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
   const filters = caseFilterSchema.parse(flat);
-  const [result, todayIso, regions] = await Promise.all([
-    listCases(user, filters),
-    today(),
-    can(user.roles, "instrument.view_all") ? regionsList() : Promise.resolve(null),
-  ]);
+  const todayIso = await today();
+  const [result, regions] = await Promise.all([listCases(user, filters, todayIso), can(user.roles, "instrument.view_all") ? regionsList() : Promise.resolve(null)]);
 
   const pageHref = (p: number) => {
     const qs = new URLSearchParams(Object.entries({ ...flat, page: String(p) }).filter(([, v]) => v) as [string, string][]);
@@ -40,6 +38,7 @@ export default async function CasesPage({ searchParams }: PageProps<"/app/cases"
         ) : null}
       </PageHeader>
 
+      <AskChips values={flat as Record<string, string | undefined>} regions={regions} />
       <FilterBar values={flat as Record<string, string | undefined>} regions={regions} />
 
       <Card className="overflow-x-auto">

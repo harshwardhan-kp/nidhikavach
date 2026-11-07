@@ -548,7 +548,9 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
     }
 
     if (l.discrepancyStatus) {
-      const raised = addDays(submittedOn, rng.int(3, 12));
+      // Old FDRs get their discrepancies from the re-verification sweep, so they are recent (9-36 days); new ones a few days after submission.
+      const lag = rng.int(3, 12);
+      const raised = daysBetween(submittedOn, today) > 60 ? addDays(today, -lag * 3) : addDays(submittedOn, lag);
       const d = {
         amount_mismatch: { kind: "field_mismatch", field: "amount", severity: "critical", title: "Bank confirms a different amount", detail: `Declared ₹${inrGroup(l.rupees)}; the bank confirms ₹${inrGroup(bankAmount)}. The scan shows the declared amount, so the scan itself may be altered.` },
         premature_closure: { kind: "field_mismatch", field: "maturityDate", severity: "critical", title: "Bank reports the FDR closed before maturity", detail: `Declared maturity ${dmy(l.maturityDate)}; the bank shows the deposit closed on ${dmy(bankMaturity)}.` },

@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { TrustMeter } from "@/components/case-ui";
 import { Card, PageHeader, Pill, Stat } from "@/components/ui";
-import { ROLE_LABEL } from "@/lib/auth/roles";
+import { can, ROLE_LABEL } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/session";
 import { today } from "@/lib/clock";
 import { ledgerHead } from "@/lib/ledger";
 import { formatCrore, formatDate, formatDateTime, formatPaise } from "@/lib/utils";
 import { listCases, maturityForecast, overviewStats } from "@/modules/cases/queries";
 import { scopeLabel } from "@/modules/cases/scope";
+import { regionBreakdown } from "@/modules/oversight/queries";
+import { BriefingCard, BriefingSkeleton } from "./_overview/briefing-card";
+import { RegionTable } from "./_overview/region-table";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -17,12 +21,14 @@ const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 export default async function OverviewPage() {
   const user = await requireUser();
   const todayIso = await today();
-  const [stats, action, forecast, head] = await Promise.all([
+  const [stats, action, forecast, head, regions] = await Promise.all([
     overviewStats(user, todayIso),
     listCases(user, { view: "action" }),
     maturityForecast(user, todayIso),
     ledgerHead(),
+    regionBreakdown(user, todayIso),
   ]);
+  const hq = can(user.roles, "instrument.view_all");
 
   // Pad the forecast to 12 consecutive months.
   const start = new Date(`${todayIso.slice(0, 7)}-01T00:00:00Z`);
@@ -54,6 +60,15 @@ export default async function OverviewPage() {
         />
         <Stat label="release requests" value={stats.releases} hint="maker → checker → authority" />
       </div>
+
+      {hq ? (
+        <div className="mt-4 grid gap-4 xl:grid-cols-[1.7fr_1fr]">
+          {regions ? <RegionTable rows={[...regions]} /> : null}
+          <Suspense fallback={<BriefingSkeleton />}>
+            <BriefingCard user={user} today={todayIso} />
+          </Suspense>
+        </div>
+      ) : null}
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[1.7fr_1fr]">
         <Card className="overflow-hidden">

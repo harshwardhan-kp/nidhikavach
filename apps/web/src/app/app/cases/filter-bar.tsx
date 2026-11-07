@@ -29,6 +29,8 @@ export function FilterBar({ values, regions }: Props) {
   const submit = () => ref.current?.requestSubmit();
   return (
     <Form ref={ref} action="/app/cases" className="mb-4 flex flex-wrap items-center gap-2">
+      {/* Filters set by the plain-language ask (A3) survive changes to the selects. */}
+      {(["within", "maturedAgo", "minLakh", "ask"] as const).map((k) => (values[k] ? <input key={k} type="hidden" name={k} value={values[k]} /> : null))}
       <input
         name="q"
         defaultValue={values.q ?? ""}

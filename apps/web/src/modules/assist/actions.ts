@@ -145,3 +145,35 @@ export async function askHandbookAction(question: string, caseNo: string | null)
     return { ok: false as const, message: e instanceof Error ? e.message : "The model is unavailable" };
   }
 }
+
+/** A3: returns the /app/cases URL for a plain-language question. */
+export async function askSearchAction(question: string) {
+  const user = await requireUser();
+  const q = z.string().trim().min(3).max(200).safeParse(question);
+  if (!q.success) return { ok: false as const, message: "Type a question" };
+  try {
+    const a = await (await import("./search")).parseAsk(q.data, user.id);
+    const { regionsList } = await import("@/modules/cases/queries");
+    const region = a.regionCode ? (await regionsList()).find((r) => r.code === a.regionCode)?.id : undefined;
+    const params: Record<string, string | number | null | undefined> = {
+      q: a.text,
+      risk: a.risk,
+      record: a.record,
+      verification: a.verification,
+      validity: a.validity,
+      renewal: a.renewal,
+      release: a.release,
+      region: can(user.roles, "instrument.view_all") ? region : undefined,
+      within: a.maturesWithinDays,
+      maturedAgo: a.maturedAtLeastDaysAgo,
+      minLakh: a.minAmountLakh,
+      view: a.view ?? (a.renewal === "renewed" || a.release === "released" ? "all" : undefined),
+      sort: a.sort,
+      ask: q.data,
+    };
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v != null && v !== "").map(([k, v]) => [k, String(v)]));
+    return { ok: true as const, url: `/app/cases?${qs}` };
+  } catch (e) {
+    return { ok: false as const, message: e instanceof Error ? e.message : "The model is unavailable" };
+  }
+}

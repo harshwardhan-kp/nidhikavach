@@ -4,7 +4,7 @@
 
 Smart India Hackathon 2026 · Problem Statement **SIH26265** (AICTE Regulation Bureau, *Streamline of Security Deposit / FDR Portal*) · Theme: Smart Automation · Team **AIT_G_SPARK**, Army Institute of Technology, Pune.
 
-> Status: **working prototype, phases 0–1 of 6 done**: portal shell, five roles, hash-chained audit ledger, demo clock, ~8,700 synthetic FDRs on real bank branches, cases list and case page with the three-source check, institution FDR submission with direct scan upload, and AI-assisted legacy register import. Build plan: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md).
+> Status: **working prototype, phases 0–2 of 6 done**: portal shell, five roles, hash-chained audit ledger, demo clock, ~8,700 synthetic FDRs on real bank branches, cases list and case page with the three-source check, institution FDR submission with direct scan upload, AI-assisted legacy register import, and verification: every scan read by Azure Document Intelligence and gpt-6.1-terra side by side, a JPEG-ghost tamper check with an AI second opinion, simulated bank confirmation over Account Aggregator / NeSL / bank letter (maker + checker), auto-raised discrepancies with threads, a verification queue and a mock bank teller. Build plan: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md).
 
 ## The idea
 

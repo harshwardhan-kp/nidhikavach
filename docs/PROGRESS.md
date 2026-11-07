@@ -1,6 +1,6 @@
 # NidhiKavach build progress (handoff)
 
-Last updated: 7 Nov 2026 (P5 done). Branch `prototype` (pushed). Plan: [`BUILD_PLAN.md`](BUILD_PLAN.md).
+Last updated: 8 Nov 2026 (all phases done). Branch `prototype` (pushed). Plan: [`BUILD_PLAN.md`](BUILD_PLAN.md).
 
 ## Done
 
@@ -40,13 +40,19 @@ Last updated: 7 Nov 2026 (P5 done). Branch `prototype` (pushed). Plan: [`BUILD_P
   - Metrics `/app/metrics`: six PS scenarios, written manual baseline vs live measurements (`modules/oversight/metrics.ts`); live bank timings come from ledger pairs so seeded rows do not skew them.
   - Seed: open discrepancies on old FDRs are now recent (9-36 days), not dated to submission.
 
-## Next: P6 demo polish (BUILD_PLAN §10, §11)
+- **P6 demo polish** (done 8 Nov):
+  - Playwright (`apps/web/e2e/`, `playwright.config.ts`): the six PS scenarios, run in order, all passing against the dev server (3.3 min); videos in `apps/web/test-results/`. They change data: reseed afterwards.
+  - Hindi toggle (`lib/i18n.ts`, cookie `nk_lang`, `components/lang-toggle.tsx`): navigation, sign-in, institution submit form, case page sections.
+  - `/app/integrations` (live checks of every dependency, real vs simulated, production replacement) and `/app/security` (controls mapped to DPDP 2023, IT Act, CERT-In, GIGW; a pitch summary, not legal advice). Content-Security-Policy added.
+  - README rewritten; `docs/DEMO.md` pitch script with the showcase cases.
+  - Seed: specimen scans keyed by content hash (the sidecar is write-once and seeded dates move daily; same-name keys served stale images).
 
-1. Six Playwright scenarios against the deployed site (`e2e/`), also the demo script; record for the video.
-2. Hindi toggle on key screens (institution submit, case page header, letters already bilingual).
-3. Security & compliance page (BUILD_PLAN §8: DPDP 2023, IT Act eSign, CERT-In, GIGW) and an integrations status page (AA, NeSL, Doc-AI, eSign: real vs simulated).
-4. README, landing page and deck refresh; demo script doc.
-5. Final reseed, deploy, full browser pass.
+## Possible next steps
+
+- Landing page and deck still describe the plan, not the built prototype: refresh screenshots and claims.
+- Hold period counts from the current FDR's issue date, not the first FDR in a renewal chain.
+- The handbook notes cover APH 2024-27; the 2026-27 addendum was not reviewed.
+- Lien text is "Member Secretary, AICTE, New Delhi"; the handbook describes a joint holding with the Trust's Secretary.
 
 ## Working notes
 

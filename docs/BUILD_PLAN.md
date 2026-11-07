@@ -215,7 +215,7 @@ Vitest for lanes, trust score, rules, maker != checker. pytest for field mapping
 | **P3 Lifecycle** ✅ done 7 Nov | lanes engine, rules, reminders + escalation, inbox/outbox, renewal, demo clock, case brief (A4), drafting (A6) | 2 d |
 | **P4 Release** ✅ done 7 Nov | 3-step approval, eSign, release order PDF, QR verify, APH rules assistant (A7) | 1.5 d |
 | **P5 Oversight** ✅ done 7 Nov | dashboard, reports + export, plain-language search (A3), ask-this-case (A5), bureau briefing (A10), ledger verifier, metrics page | 2 d |
-| **P6 Demo polish** | six Playwright scenarios, demo script, Hindi toggle on key screens, README, landing/deck refresh | 1 d |
+| **P6 Demo polish** ✅ done 8 Nov | six Playwright scenarios, demo script, Hindi toggle on key screens, README, landing/deck refresh | 1 d |
 
 About 12 working days. A8 (legacy import) lands in P1; voice ask is a stretch goal after P6.
 

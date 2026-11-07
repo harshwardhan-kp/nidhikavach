@@ -5,15 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { askSearchAction } from "@/modules/assist/actions";
 
-const EXAMPLES = ["fdrs maturing in 60 days, not renewed", "red cases in the western region", "bank mismatches above ₹20 lakh", "renewals overdue, high value"];
-
 /** A3: plain-language ask in the top bar; lands on the cases list with editable chips. */
-export function AskBar() {
+export function AskBar({ placeholder }: { placeholder: string }) {
   const router = useRouter();
   const [text, setText] = useState("");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [hint] = useState(() => EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)]);
   return (
     <form
       className="flex min-w-0 flex-1 items-center gap-2 rounded-[12px] border border-line bg-card px-3 py-2 text-[13px] focus-within:border-ink"
@@ -32,7 +29,7 @@ export function AskBar() {
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder={`ask: “${hint}”`}
+        placeholder={placeholder}
         aria-label="Ask in plain language"
         className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-mut"
       />

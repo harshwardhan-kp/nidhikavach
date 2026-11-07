@@ -13,6 +13,8 @@ type Props = {
   renewable: { caseNo: string; label: string }[];
   defaultReplaces?: string;
   lienDefault: string;
+  /** Translated UI strings (keyed by the English text). */
+  t?: Record<string, string>;
 };
 
 const input = "w-full rounded-[10px] border border-line bg-white px-3 py-2.5 text-[14px] outline-none focus:border-ink aria-[invalid=true]:border-red";
@@ -48,7 +50,8 @@ async function uploadScan(file: File): Promise<{ key: string } | { error: string
   return { key };
 }
 
-export function SubmitForm({ institutionName, programmes, renewable, defaultReplaces, lienDefault }: Props) {
+export function SubmitForm({ institutionName, programmes, renewable, defaultReplaces, lienDefault, t = {} }: Props) {
+  const T = (en: string) => t[en] ?? en;
   const [stage, setStage] = useState<"idle" | "uploading" | "saving">("idle");
   const [branch, setBranch] = useState<Branch | null | "loading" | "none">(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -84,9 +87,9 @@ export function SubmitForm({ institutionName, programmes, renewable, defaultRepl
   return (
     <form action={action} className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
       <Card className="flex flex-col gap-4 p-5">
-        <div className="kicker">instrument details</div>
+        <div className="kicker">{T("instrument details")}</div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field name="programme" label="programme" error={e.programme}>
+          <Field name="programme" label={T("programme")} error={e.programme}>
             <input id="programme" name="programme" list="programmes" required className={input} aria-invalid={!!e.programme} placeholder="e.g. B.Tech Computer Engineering" />
             <datalist id="programmes">
               {programmes.map((p) => (
@@ -94,28 +97,28 @@ export function SubmitForm({ institutionName, programmes, renewable, defaultRepl
               ))}
             </datalist>
           </Field>
-          <Field name="type" label="instrument type" error={e.type}>
+          <Field name="type" label={T("instrument type")} error={e.type}>
             <select id="type" name="type" className={input} defaultValue="fdr">
               <option value="fdr">Fixed deposit receipt (FDR)</option>
               <option value="efdr">e-FDR</option>
               <option value="bg">Bank guarantee</option>
             </select>
           </Field>
-          <Field name="instrumentNo" label="fdr / receipt number" error={e.instrumentNo}>
+          <Field name="instrumentNo" label={T("fdr / receipt number")} error={e.instrumentNo}>
             <input id="instrumentNo" name="instrumentNo" required className={cn(input, "font-mono")} aria-invalid={!!e.instrumentNo} />
           </Field>
-          <Field name="amount" label="amount (₹)" error={e.amount}>
+          <Field name="amount" label={T("amount (₹)")} error={e.amount}>
             <input id="amount" name="amount" type="number" min={1000} step={1} required className={cn(input, "font-mono")} aria-invalid={!!e.amount} placeholder="1000000" />
           </Field>
-          <Field name="issueDate" label="date of deposit" error={e.issueDate}>
+          <Field name="issueDate" label={T("date of deposit")} error={e.issueDate}>
             <input id="issueDate" name="issueDate" type="date" required className={input} aria-invalid={!!e.issueDate} />
           </Field>
-          <Field name="maturityDate" label="maturity date" error={e.maturityDate}>
+          <Field name="maturityDate" label={T("maturity date")} error={e.maturityDate}>
             <input id="maturityDate" name="maturityDate" type="date" required className={input} aria-invalid={!!e.maturityDate} />
           </Field>
         </div>
 
-        <Field name="ifsc" label="ifsc of issuing branch" error={e.ifsc}>
+        <Field name="ifsc" label={T("ifsc of issuing branch")} error={e.ifsc}>
           <input
             id="ifsc"
             name="ifsc"
@@ -132,7 +135,7 @@ export function SubmitForm({ institutionName, programmes, renewable, defaultRepl
             <Loader2 size={13} className="animate-spin" /> looking up branch…
           </p>
         ) : branch === "none" ? (
-          <p className="-mt-2 text-[12px] text-red">No branch found for this IFSC.</p>
+          <p className="-mt-2 text-[12px] text-red">{T("No branch found for this IFSC.")}</p>
         ) : branch ? (
           <p className="-mt-2 flex items-start gap-1.5 text-[12.5px] text-green">
             <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
@@ -143,10 +146,10 @@ export function SubmitForm({ institutionName, programmes, renewable, defaultRepl
         ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field name="depositorName" label="depositor (as on the receipt)" error={e.depositorName}>
+          <Field name="depositorName" label={T("depositor (as on the receipt)")} error={e.depositorName}>
             <input id="depositorName" name="depositorName" required defaultValue={institutionName} className={input} />
           </Field>
-          <Field name="lienHolder" label="lien marked in favour of" error={e.lienHolder} hint="Must be AICTE for a security deposit">
+          <Field name="lienHolder" label={T("lien marked in favour of")} error={e.lienHolder} hint={T("Must be AICTE for a security deposit")}>
             <input id="lienHolder" name="lienHolder" required defaultValue={lienDefault} className={input} />
           </Field>
         </div>
@@ -157,7 +160,7 @@ export function SubmitForm({ institutionName, programmes, renewable, defaultRepl
 
       <div className="flex flex-col gap-4">
         <Card className="flex flex-col gap-3 p-5">
-          <div className="kicker">fdr scan</div>
+          <div className="kicker">{T("fdr scan")}</div>
           <label
             htmlFor="scan"
             className={cn(
@@ -167,7 +170,7 @@ export function SubmitForm({ institutionName, programmes, renewable, defaultRepl
           >
             <FileUp size={22} className="text-txt" />
             <span className="text-[13px]">{fileName ?? "Choose the scanned FDR (PDF, JPG or PNG, up to 10 MB)"}</span>
-            <span className="tag">[sent straight to the encrypted document store]</span>
+            <span className="tag">{T("[sent straight to the encrypted document store]")}</span>
           </label>
           <input id="scan" name="scan" type="file" accept="application/pdf,image/png,image/jpeg" className="sr-only" onChange={(ev) => setFileName(ev.currentTarget.files?.[0]?.name ?? null)} />
           {e.fileKey ? (
@@ -178,9 +181,9 @@ export function SubmitForm({ institutionName, programmes, renewable, defaultRepl
         </Card>
 
         <Card className="flex flex-col gap-3 p-5">
-          <div className="kicker">renewal or replacement?</div>
+          <div className="kicker">{T("renewal or replacement?")}</div>
           <select name="replacesCaseNo" defaultValue={defaultReplaces ?? ""} className={input} aria-label="Replaces an existing FDR">
-            <option value="">No, this is a new deposit</option>
+            <option value="">{T("No, this is a new deposit")}</option>
             {renewable.map((r) => (
               <option key={r.caseNo} value={r.caseNo}>
                 Renews {r.label}
@@ -188,14 +191,14 @@ export function SubmitForm({ institutionName, programmes, renewable, defaultRepl
             ))}
           </select>
           {e.replacesCaseNo ? <p className="text-[12px] text-red">{e.replacesCaseNo}</p> : null}
-          <p className="text-[12px] text-txt">Linking a renewal keeps one history for the deposit and stops its reminders.</p>
+          <p className="text-[12px] text-txt">{T("Linking a renewal keeps one history for the deposit and stops its reminders.")}</p>
         </Card>
 
         {state?.message ? <p className="text-[13px] text-red">{state.message}</p> : null}
         <Button type="submit" disabled={busy}>
-          {stage === "uploading" ? "[uploading scan…]" : stage === "saving" ? "[submitting…]" : "[submit for verification]"}
+          {stage === "uploading" ? T("[uploading scan…]") : stage === "saving" ? T("[submitting…]") : T("[submit for verification]")}
         </Button>
-        <p className="tag">[after you submit, the dealing officer is notified and the scan is read by doc-ai]</p>
+        <p className="tag">{T("[after you submit, the dealing officer is notified and the scan is read by doc-ai]")}</p>
       </div>
     </form>
   );

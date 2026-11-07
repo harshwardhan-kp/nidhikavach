@@ -7,6 +7,8 @@ import { can, ROLE_LABEL } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/session";
 import { today } from "@/lib/clock";
 import { ledgerHead } from "@/lib/ledger";
+import { tr } from "@/lib/i18n";
+import { getLang } from "@/lib/lang";
 import { formatCrore, formatDate, formatDateTime, formatPaise } from "@/lib/utils";
 import { listCases, maturityForecast, overviewStats } from "@/modules/cases/queries";
 import { scopeLabel } from "@/modules/cases/scope";
@@ -21,6 +23,7 @@ const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 export default async function OverviewPage() {
   const user = await requireUser();
   const todayIso = await today();
+  const lang = await getLang();
   const [stats, action, forecast, head, regions] = await Promise.all([
     overviewStats(user, todayIso),
     listCases(user, { view: "action" }),
@@ -44,8 +47,8 @@ export default async function OverviewPage() {
   return (
     <>
       <PageHeader
-        title="deposit & fdr"
-        italic="overview"
+        title={tr(lang, "deposit & fdr")}
+        italic={tr(lang, "overview")}
         sub={`[${scopeLabel(user)} · ${formatDate(todayIso)} · ${ROLE_LABEL[user.primaryRole].toLowerCase()}]`}
       />
 

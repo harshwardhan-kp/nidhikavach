@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
 import { Card } from "@/components/ui";
+import { tr } from "@/lib/i18n";
+import { getLang } from "@/lib/lang";
 import { can, distinctActor } from "@/lib/auth/roles";
 import type { SessionUser } from "@/lib/auth/session";
 import { signedGetUrl } from "@/lib/sidecar";
@@ -32,7 +34,7 @@ export async function ReleaseSection({ c, user }: { c: CaseDetail; user: Session
   return (
     <Card className="p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="kicker">release / refund</div>
+        <div className="kicker">{tr(await getLang(), "release / refund")}</div>
         <span className="tag">[maker → checker → authority · eSign]</span>
       </div>
       <ReleasePanel

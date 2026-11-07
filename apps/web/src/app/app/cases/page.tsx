@@ -5,6 +5,8 @@ import { Card, PageHeader } from "@/components/ui";
 import { can } from "@/lib/auth/roles";
 import { requireUser } from "@/lib/auth/session";
 import { today } from "@/lib/clock";
+import { tr } from "@/lib/i18n";
+import { getLang } from "@/lib/lang";
 import { daysBetween } from "@/lib/rules/lanes";
 import { formatDate, formatPaise } from "@/lib/utils";
 import { TYPE_LABEL } from "@/modules/cases/labels";
@@ -21,6 +23,7 @@ export default async function CasesPage({ searchParams }: PageProps<"/app/cases"
   const flat = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
   const filters = caseFilterSchema.parse(flat);
   const todayIso = await today();
+  const lang = await getLang();
   const [result, regions] = await Promise.all([listCases(user, filters, todayIso), can(user.roles, "instrument.view_all") ? regionsList() : Promise.resolve(null)]);
 
   const pageHref = (p: number) => {
@@ -30,7 +33,7 @@ export default async function CasesPage({ searchParams }: PageProps<"/app/cases"
 
   return (
     <>
-      <PageHeader title="deposit" italic="cases" sub={`[${scopeLabel(user)} · ${result.total.toLocaleString("en-IN")} matching · sorted by ${filters.sort ?? "risk"}]`}>
+      <PageHeader title={tr(lang, "deposit")} italic={tr(lang, "cases")} sub={`[${scopeLabel(user)} · ${result.total.toLocaleString("en-IN")} matching · sorted by ${filters.sort ?? "risk"}]`}>
         {can(user.roles, "instrument.submit") ? (
           <Link href="/app/submit" className="rounded-[10px] bg-ink-2 px-4 py-2.5 font-mono text-[13px] text-white hover:opacity-85">
             [+ submit an FDR]

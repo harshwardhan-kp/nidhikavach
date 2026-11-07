@@ -5,6 +5,8 @@ import { db, schema } from "@/db";
 import { LIEN_TEXT } from "@/lib/rules/fields";
 import { requirePermission } from "@/lib/auth/session";
 import { formatDate } from "@/lib/utils";
+import { tr } from "@/lib/i18n";
+import { getLang } from "@/lib/lang";
 import { SubmitForm } from "./submit-form";
 
 // The submission kicks off the scan read with after(), which runs within this budget.
@@ -25,9 +27,12 @@ export default async function SubmitPage({ searchParams }: PageProps<"/app/submi
       .where(and(eq(I.institutionId, instId), inArray(I.renewalStatus, ["due", "overdue"]))),
   ]);
 
+  const lang = await getLang();
+  const keys = ["instrument details", "programme", "instrument type", "fdr / receipt number", "amount (₹)", "date of deposit", "maturity date", "ifsc of issuing branch", "depositor (as on the receipt)", "lien marked in favour of", "Must be AICTE for a security deposit", "fdr scan", "renewal or replacement?", "No, this is a new deposit", "Linking a renewal keeps one history for the deposit and stops its reminders.", "[sent straight to the encrypted document store]", "[uploading scan…]", "[submitting…]", "[submit for verification]", "[after you submit, the dealing officer is notified and the scan is read by doc-ai]", "No branch found for this IFSC."];
+
   return (
     <>
-      <PageHeader title="submit an" italic="fdr" sub={`[${user.institutionName} · one submission per instrument]`} />
+      <PageHeader title={tr(lang, "submit an")} italic={tr(lang, "fdr")} sub={`[${user.institutionName} · one submission per instrument]`} />
       <SubmitForm
         institutionName={user.institutionName ?? ""}
         programmes={mine.map((m) => m.programme)}
@@ -37,6 +42,7 @@ export default async function SubmitPage({ searchParams }: PageProps<"/app/submi
         }))}
         defaultReplaces={typeof renews === "string" ? renews : undefined}
         lienDefault={LIEN_TEXT}
+        t={Object.fromEntries(keys.map((k) => [k, tr(lang, k)]))}
       />
     </>
   );

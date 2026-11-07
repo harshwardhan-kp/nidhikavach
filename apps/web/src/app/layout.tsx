@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getLang } from "@/lib/lang";
 import { geistMono, instrument, schibsted } from "./fonts";
 import "./globals.css";
 
@@ -8,9 +9,10 @@ export const metadata: Metadata = {
   icons: { icon: "/assets/logo.png" },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const lang = await getLang();
   return (
-    <html lang="en" className={`${schibsted.variable} ${geistMono.variable} ${instrument.variable} h-full`}>
+    <html lang={lang} className={`${schibsted.variable} ${geistMono.variable} ${instrument.variable} h-full`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

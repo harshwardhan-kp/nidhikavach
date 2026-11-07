@@ -14,6 +14,8 @@ import type { TrustResult } from "@/lib/rules/trust";
 import { cn, formatDate, formatDateTime, formatPaise } from "@/lib/utils";
 import { label, TYPE_LABEL } from "@/modules/cases/labels";
 import { getCase } from "@/modules/cases/queries";
+import { tr } from "@/lib/i18n";
+import { getLang } from "@/lib/lang";
 import { documentUrl } from "@/modules/documents/view";
 import { signedGetUrl, type TamperFinding } from "@/lib/sidecar";
 import type { TamperOpinion } from "@/modules/verify/vision";
@@ -67,6 +69,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
   const c = await getCase(user, decodeURIComponent(caseNo));
   if (!c) notFound();
   const todayIso = await today();
+  const lang = await getLang();
   const i = c.i;
   const days = i.maturityDate ? daysBetween(todayIso, i.maturityDate) : null;
   const trust = i.trustBreakdown as TrustResult | null;
@@ -174,7 +177,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
           </div>
           <div className="flex items-end gap-8">
             <div>
-              <div className="tag">[amount]</div>
+              <div className="tag">[{tr(lang, "amount")}]</div>
               <div className="mt-1 text-[26px] font-semibold tracking-[-0.5px]">{formatPaise(i.amountPaise)}</div>
             </div>
             <TrustMeter score={i.trustScore} band={i.riskBand} size="lg" />
@@ -185,7 +188,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
       <Card className="grid grid-cols-2 gap-px overflow-hidden bg-line-2 sm:grid-cols-5">
         {lanes.map(([lane, value]) => (
           <div key={lane} className="bg-card px-4 py-3">
-            <div className="tag">[{lane}]</div>
+            <div className="tag">[{tr(lang, lane)}]</div>
             <LanePill value={value} className="mt-1.5" />
           </div>
         ))}
@@ -193,7 +196,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
 
       <div className="grid gap-4 xl:grid-cols-[1.65fr_1fr]">
         <div className="flex min-w-0 flex-col gap-4">
-          <Section title="three-source check" aside={<span className="tag">[declared · scan · bank]</span>}>
+          <Section title={tr(lang, "three-source check")} aside={<span className="tag">[declared · scan · bank]</span>}>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left text-[12.5px]">
                 <thead>
@@ -262,8 +265,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
           </Section>
 
           {scan ? (
-            <Section
-              title="scan"
+            <Section title={tr(lang, "scan")}
               aside={
                 <span className="flex items-center gap-2">
                   {scan.doc.synthetic ? <Simulated what="synthetic scan" /> : null}
@@ -341,7 +343,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
             </Section>
           ) : null}
 
-          <Section title="discrepancies" aside={<span className="tag">[{c.openDiscrepancies} open]</span>}>
+          <Section title={tr(lang, "discrepancies")} aside={<span className="tag">[{c.openDiscrepancies} open]</span>}>
             {c.discrepancies.length ? (
               <ul className="flex flex-col divide-y divide-line-2">
                 {c.discrepancies.map((d) => (
@@ -375,7 +377,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
             )}
           </Section>
 
-          <Section title="bank verification" aside={<Simulated what="mock bank / AA" />}>
+          <Section title={tr(lang, "bank verification")} aside={<Simulated what="mock bank / AA" />}>
             {c.verifications.length ? (
               <ul className="flex flex-col divide-y divide-line-2">
                 {c.verifications.map(({ v, requestedBy }) => {
@@ -418,17 +420,17 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
 
         <div className="flex min-w-0 flex-col gap-4">
           {can(user.roles, "reports.view") ? (
-            <Section title="case brief" aside={<span className="tag">[a4 · cited]</span>}>
+            <Section title={tr(lang, "case brief")} aside={<span className="tag">[a4 · cited]</span>}>
               <CaseBrief caseNo={i.caseNo} />
             </Section>
           ) : null}
           {can(user.roles, "reports.view") ? (
-            <Section title="ask this case" aside={<span className="tag">[a5]</span>}>
+            <Section title={tr(lang, "ask this case")} aside={<span className="tag">[a5]</span>}>
               <AskCase caseNo={i.caseNo} />
             </Section>
           ) : null}
           {trust && (i.riskBand === "red" || i.riskBand === "amber") ? (
-            <Section title="why this case needs attention" aside={<span className="tag">[gpt-6-luna · from the record]</span>} className={i.riskBand === "red" ? "border-red/40" : "border-amber/40"}>
+            <Section title={tr(lang, "why this case needs attention")} aside={<span className="tag">[gpt-6-luna · from the record]</span>} className={i.riskBand === "red" ? "border-red/40" : "border-amber/40"}>
               <Suspense fallback={<RiskLineSkeleton />}>
                 <RiskLine
                   caseNo={i.caseNo}
@@ -441,7 +443,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
             </Section>
           ) : null}
 
-          <Section title="next action">
+          <Section title={tr(lang, "next action")}>
             {i.nextAction ? (
               <>
                 <p className="text-[15px] font-semibold">{i.nextAction}</p>
@@ -450,12 +452,12 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
                 </p>
               </>
             ) : (
-              <p className="text-[13px] text-txt">Nothing pending on this instrument.</p>
+              <p className="text-[13px] text-txt">{tr(lang, "Nothing pending on this instrument.")}</p>
             )}
           </Section>
 
           {!isInstitution && !["released", "refunded"].includes(i.releaseStatus) && !["renewed", "replaced"].includes(i.renewalStatus) ? (
-            <Section title="actions" aside={<span className="tag">[{user.roles.join(" · ")}]</span>}>
+            <Section title={tr(lang, "actions")} aside={<span className="tag">[{user.roles.join(" · ")}]</span>}>
               <ActionsPanel
                 caseNo={i.caseNo}
                 can={perms}
@@ -474,7 +476,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
           ) : null}
 
           {perms.scrutinise || perms.confirm || can(user.roles, "release.approve") ? (
-            <Section title="draft a letter" aside={<span className="tag">[a6 · en / hi]</span>}>
+            <Section title={tr(lang, "draft a letter")} aside={<span className="tag">[a6 · en / hi]</span>}>
               <DraftPanel
                 caseNo={i.caseNo}
                 suggested={i.renewalStatus === "overdue" ? "escalation_note" : c.openDiscrepancies ? "discrepancy_letter" : "bank_request"}
@@ -482,7 +484,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
             </Section>
           ) : null}
 
-          <Section title="instrument">
+          <Section title={tr(lang, "instrument")}>
             <dl className="grid grid-cols-[130px_1fr] gap-x-3 gap-y-2 text-[13px]">
               <dt className="tag">[bank]</dt>
               <dd>{i.bankName}</dd>
@@ -510,7 +512,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
             </dl>
           </Section>
 
-          <Section title="documents" aside={<span className="tag">[{c.documents.length}]</span>}>
+          <Section title={tr(lang, "documents")} aside={<span className="tag">[{c.documents.length}]</span>}>
             {docs.length ? (
               <div className="flex flex-col gap-3">
                 {docs.map((d) => (
@@ -551,7 +553,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
           </Section>
 
           {c.chain.length > 1 ? (
-            <Section title="renewal history">
+            <Section title={tr(lang, "renewal history")}>
               <ol className="flex flex-col gap-2">
                 {c.chain.map((link) => (
                   <li key={link.case_no} className={cn("rounded-[10px] border px-3 py-2", link.case_no === i.caseNo ? "border-ink" : "border-line-2")}>
@@ -570,7 +572,7 @@ export default async function CasePage({ params, searchParams }: PageProps<"/app
             </Section>
           ) : null}
 
-          <Section title="audit trail" aside={<span className="tag">[hash-chained]</span>}>
+          <Section title={tr(lang, "audit trail")} aside={<span className="tag">[hash-chained]</span>}>
             <ol className="flex flex-col gap-2.5">
               {c.ledger.map(({ e, actor }) => (
                 <li key={e.seq} id={`ledger-${e.seq}`} className="scroll-mt-24 border-l-2 border-line pl-3 target:border-red target:bg-red-soft/40">

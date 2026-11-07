@@ -1,5 +1,8 @@
 import { Bell } from "lucide-react";
 import { AskBar } from "@/components/ask-bar";
+import { LangToggle } from "@/components/lang-toggle";
+import { tr } from "@/lib/i18n";
+import { getLang } from "@/lib/lang";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { RoleSwitcher } from "@/components/role-switcher";
@@ -14,8 +17,8 @@ import { unreadCount } from "@/modules/messages/queries";
 
 export default async function PortalLayout({ children }: LayoutProps<"/app">) {
   const user = await requireUser();
-  const [offset, todayIso, unread] = await Promise.all([getClockOffsetDays(), today(), unreadCount(user)]);
-  const items = NAV.filter((i) => !i.perm || can(user.roles, i.perm));
+  const [offset, todayIso, unread, lang] = await Promise.all([getClockOffsetDays(), today(), unreadCount(user), getLang()]);
+  const items = NAV.filter((i) => !i.perm || can(user.roles, i.perm)).map((i) => ({ ...i, label: tr(lang, i.label) }));
   const scope = user.institutionName ?? (user.regionName ? `${user.regionName} region` : "all regions");
 
   return (
@@ -26,14 +29,14 @@ export default async function PortalLayout({ children }: LayoutProps<"/app">) {
         </div>
         <SidebarNav items={items} badges={{ "/app/inbox": unread }} />
         <div className="mt-auto rounded-[12px] border border-line bg-card p-3">
-          <div className="tag">[scope]</div>
+          <div className="tag">[{tr(lang, "scope")}]</div>
           <div className="mt-1 text-[12.5px] font-semibold">{scope}</div>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-col">
         <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-paper/90 px-5 py-3 backdrop-blur md:px-8">
-          <AskBar />
+          <AskBar placeholder={tr(lang, "ask: “fdrs maturing in 60 days, not renewed”")} />
           <div className="hidden items-center gap-2 lg:flex">
             <span className="tag text-[12px]">[{formatDate(todayIso)}]</span>
             {offset !== 0 ? <Pill tone="red">demo clock {offset > 0 ? `+${offset}` : offset}d</Pill> : null}
@@ -42,6 +45,7 @@ export default async function PortalLayout({ children }: LayoutProps<"/app">) {
             <Bell size={16} />
             {unread ? <span className="absolute -top-1.5 -right-1.5 rounded-full bg-red px-1.5 font-mono text-[10px] text-white">{unread}</span> : null}
           </Link>
+          <LangToggle lang={lang} />
           <RoleSwitcher user={user} />
         </header>
         <main className="flex-1 px-5 py-7 md:px-8">{children}</main>

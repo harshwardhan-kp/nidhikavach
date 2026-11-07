@@ -21,6 +21,7 @@ export type Permission =
   | "instrument.view_scope"
   | "instrument.view_all"
   | "instrument.scrutinise"
+  | "instrument.import"
   | "verification.request"
   | "verification.confirm"
   | "discrepancy.raise"
@@ -49,6 +50,7 @@ const P: Record<Role, Permission[]> = {
   maker: [
     "instrument.view_scope",
     "instrument.scrutinise",
+    "instrument.import",
     "verification.request",
     "discrepancy.raise",
     "release.recommend",
@@ -65,7 +67,7 @@ const P: Record<Role, Permission[]> = {
   ],
   authority: ["instrument.view_all", "release.approve", "reports.view", "ledger.view"],
   auditor: ["instrument.view_all", "reports.view", "ledger.view", "ledger.verify"],
-  admin: ["instrument.view_all", "reports.view", "ledger.view", "ledger.verify", "admin.users", "admin.rules", "admin.clock"],
+  admin: ["instrument.view_all", "instrument.import", "reports.view", "ledger.view", "ledger.verify", "admin.users", "admin.rules", "admin.clock"],
 };
 
 export function can(roles: readonly Role[], perm: Permission) {

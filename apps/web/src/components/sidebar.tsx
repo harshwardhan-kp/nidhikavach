@@ -10,6 +10,8 @@ import {
   RefreshCw,
   ScanLine,
   Settings,
+  FileSpreadsheet,
+  Upload,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -27,6 +29,8 @@ const ICONS: Record<string, LucideIcon> = {
   chart: BarChart3,
   link: Link2,
   settings: Settings,
+  upload: Upload,
+  sheet: FileSpreadsheet,
 };
 
 export function SidebarNav({ items }: { items: NavItem[] }) {

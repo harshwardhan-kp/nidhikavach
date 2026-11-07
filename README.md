@@ -12,7 +12,7 @@ Smart India Hackathon 2026 · Problem Statement **SIH26265** (AICTE Regulation B
 
 | PS capability | In the prototype |
 |---|---|
-| Submission & registry | Institutions submit an FDR with its scan (uploaded straight to the document store); ~8,750 synthetic FDRs on 1,498 real bank branches; legacy Excel/CSV import with AI column mapping |
+| Submission & registry | Institutions submit an FDR with its scan (uploaded straight to the document store); ~8,650 synthetic FDRs on 1,498 real bank branches; legacy Excel/CSV import with AI column mapping |
 | Verification | Every scan read by **Azure Document Intelligence and gpt-6.1-terra side by side**; a JPEG-ghost **tamper scan** with an AI second opinion; the bank asked over **Account Aggregator / NeSL** (simulated) or a bank letter confirmed by a second officer; a **three-source check** (declared · scan · bank) rolled into an explainable **trust score** |
 | Discrepancies | Raised automatically from mismatches and tamper flags, threaded with the institution, closed only by a second officer |
 | Validity, maturity, renewal | Five independent lanes (record, verification, validity, renewal, release); a daily lifecycle pass (and every demo-clock move) sends **T-90/60/30/7 reminders** and a weekly **escalation ladder**; renewal chains close when the new FDR is accepted |

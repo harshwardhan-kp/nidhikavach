@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 /**
  * Synthetic dataset generator: institutions, FDR renewal chains, three-source
  * fields, scans (as render specs), verifications, discrepancies and in-flight
@@ -472,10 +473,30 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
 
     if (l.record !== "draft") {
       const variant = l.anomaly === "no_bank_record" || l.anomaly === "amount_mismatch" ? "forged" : l.anomaly === "low_quality" ? "low_quality" : l.anomaly === "lien_other" ? "lien_other" : "clean";
+      const specimen = {
+        variant,
+        caseNo: l.caseNo,
+        bank: bankDeclared,
+        branch: title(l.branch.branch),
+        branchAddress: l.branch.address,
+        ifsc: l.branch.ifsc,
+        instrumentNo,
+        depositor: l.inst.name,
+        amountRupees: l.rupees,
+        // A forged scan shows the declared amount pasted over the real one the bank knows.
+        originalAmountRupees: variant === "forged" ? bankAmount : l.rupees,
+        issueDate: l.issueDate,
+        maturityDate: l.maturityDate,
+        lien: l.anomaly === "lien_other" ? lienOther : LIEN_TEXT,
+        autoRenew: l.autoRenew,
+        tenureYears: Math.round(daysBetween(l.issueDate, l.maturityDate) / 365),
+      };
+      // Stored files are write-once, and seeded dates move with "today": key the image by its content so a reseed never shows a stale scan.
+      const specimenKey = `specimen/${l.caseNo}-${createHash("sha256").update(JSON.stringify(specimen)).digest("hex").slice(0, 10)}.jpg`;
       ds.documents.push({
         instrumentId: id,
         kind: l.replaces ? "renewal_scan" : "fdr_scan",
-        fileKey: `specimen/${l.caseNo}.jpg`,
+        fileKey: specimenKey,
         filename: `${l.caseNo}_scan.jpg`,
         mime: "image/jpeg",
         sizeBytes: 0,
@@ -487,24 +508,7 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
         tamperScore,
         tamperFindings: tamperScore && tamperScore >= 30 ? [{ kind: "ela", detail: "Inconsistent compression around the amount field" }] : [],
         synthetic: true,
-        specimen: {
-          variant,
-          caseNo: l.caseNo,
-          bank: bankDeclared,
-          branch: title(l.branch.branch),
-          branchAddress: l.branch.address,
-          ifsc: l.branch.ifsc,
-          instrumentNo,
-          depositor: l.inst.name,
-          amountRupees: l.rupees,
-          // A forged scan shows the declared amount pasted over the real one the bank knows.
-          originalAmountRupees: variant === "forged" ? bankAmount : l.rupees,
-          issueDate: l.issueDate,
-          maturityDate: l.maturityDate,
-          lien: l.anomaly === "lien_other" ? lienOther : LIEN_TEXT,
-          autoRenew: l.autoRenew,
-          tenureYears: Math.round(daysBetween(l.issueDate, l.maturityDate) / 365),
-        },
+        specimen,
       });
     }
 

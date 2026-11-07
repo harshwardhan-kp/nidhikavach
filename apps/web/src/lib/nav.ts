@@ -8,7 +8,7 @@ export const NAV: NavItem[] = [
   { href: "/app/cases", label: "cases", icon: "folder" },
   { href: "/app/submit", label: "submit an fdr", icon: "upload", perm: "instrument.submit" },
   { href: "/app/import", label: "legacy import", icon: "sheet", perm: "instrument.import" },
-  { href: "/app/verification", label: "verification", icon: "scan", phase: "p2" },
+  { href: "/app/verification", label: "verification", icon: "scan", perm: "reports.view" },
   { href: "/app/maturity", label: "maturity watch", icon: "clock", phase: "p3" },
   { href: "/app/renewals", label: "renewals", icon: "refresh", phase: "p3" },
   { href: "/app/releases", label: "releases", icon: "handshake", phase: "p4" },

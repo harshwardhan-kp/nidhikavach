@@ -418,7 +418,8 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
     const openDisc = l.discrepancyStatus ? 1 : 0;
     const na = l.historical ? null : nextAction({
       recordStatus: l.record, verificationStatus: l.verification, validityStatus: validity, renewalStatus: renewal,
-      releaseStatus: l.release, maturityDate: l.maturityDate, openDiscrepancies: openDisc, today,
+      releaseStatus: l.release, maturityDate: l.maturityDate, openDiscrepancies: openDisc,
+      discrepanciesAwaitingCheck: l.discrepancyStatus === "resolved_pending_check" ? 1 : 0, today,
     });
     const isWro = regionCode.get(l.inst.regionId) === "WRO";
     const owner = !na ? null

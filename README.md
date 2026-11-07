@@ -4,7 +4,7 @@
 
 Smart India Hackathon 2026 · Problem Statement **SIH26265** (AICTE Regulation Bureau, *Streamline of Security Deposit / FDR Portal*) · Theme: Smart Automation · Team **AIT_G_SPARK**, Army Institute of Technology, Pune.
 
-> Status: **working prototype, phase 0 of 6 done** (foundations: portal shell, five roles, hash-chained audit ledger, demo clock). Build plan: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md).
+> Status: **working prototype, phases 0–1 of 6 done**: portal shell, five roles, hash-chained audit ledger, demo clock, ~8,700 synthetic FDRs on real bank branches, cases list and case page with the three-source check, institution FDR submission with direct scan upload, and AI-assisted legacy register import. Build plan: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md).
 
 ## The idea
 
@@ -35,7 +35,7 @@ Next.js · React · TypeScript · Tailwind CSS · NestJS · Temporal · FastAPI 
 npm install
 cp apps/web/.env.example apps/web/.env.local   # fill in the values
 npm run db:migrate
-npm run db:seed          # add -- --reset to wipe and reseed
+npm run db:seed -- --full  # add --reset to wipe and regenerate (~90 s)
 npm run dev              # http://localhost:3000
 ```
 

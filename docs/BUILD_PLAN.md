@@ -210,7 +210,7 @@ Vitest for lanes, trust score, rules, maker != checker. pytest for field mapping
 | Phase | Done when | Est. |
 |---|---|---|
 | **P0 Foundations** ✅ done 7 Nov | Next.js monorepo with landing folded in, design tokens, Drizzle schema, auth + roles + role switcher, ledger writer; Postgres + sidecar + Caddy block on the VM; Vercel deploy of `/` and `/app` | 1.5 d |
-| **P1 Registry + docs** | seeded data, institution submits FDR + scan, officer case list + case page | 1.5 d |
+| **P1 Registry + docs** ✅ done 7 Nov | seeded data, institution submits FDR + scan, officer case list + case page | 1.5 d |
 | **P2 Verify** | dual-read extraction (A1), tamper flags + AI second opinion (A2), mock bank, 3-source table, trust score, risk lines (A9), discrepancies | 2.5 d |
 | **P3 Lifecycle** | lanes engine, rules, reminders + escalation, inbox/outbox, renewal, demo clock, case brief (A4), drafting (A6) | 2 d |
 | **P4 Release** | 3-step approval, eSign, release order PDF, QR verify, APH rules assistant (A7) | 1.5 d |

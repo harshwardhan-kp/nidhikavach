@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/*
+ * NidhiKavach design tokens: same palette and type as the landing page and
+ * the deck mock. Grey paper background, near-black ink, one red accent.
+ */
+@theme {
+  --color-paper: #eeeeee;
+  --color-panel: #f6f6f5;
+  --color-card: #fbfbfa;
+  --color-ink: #1c1c1c;
+  --color-ink-2: #2b2b2b;
+  --color-txt: #5e5e5e;
+  --color-mut: #8c8c8c;
+  --color-line: #d9d9d7;
+  --color-line-2: #e4e4e2;
+  --color-chip: #e2e2e0;
+  --color-red: #e73a3a;
+  --color-red-soft: #fbe3e1;
+  --color-amber: #c98a12;
+  --color-amber-soft: #f7ecd2;
+  --color-green: #2f8a4c;
+  --color-green-soft: #dcefe1;
+  --color-blue: #2f6fb3;
+  --color-blue-soft: #dde9f6;
+
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-instrument), Georgia, serif;
+
+  --radius-card: 14px;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+}
+
+@utility tag {
+  /* The deck's [bracketed mono] label style. */
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-mut);
+  letter-spacing: 0;
+}
+
+@utility kicker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-txt);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  &::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    background: var(--color-red);
+  }
+}

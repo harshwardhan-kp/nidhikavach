@@ -4,7 +4,7 @@
 
 Smart India Hackathon 2026 · Problem Statement **SIH26265** (AICTE Regulation Bureau, *Streamline of Security Deposit / FDR Portal*) · Theme: Smart Automation · Team **AIT_G_SPARK**, Army Institute of Technology, Pune.
 
-> Status: **prototype in progress.** This repository currently holds the project landing page, the idea deck and the concept film. Application code will land here as the prototype is built.
+> Status: **working prototype, phase 0 of 6 done** (foundations: portal shell, five roles, hash-chained audit ledger, demo clock). Build plan: [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md).
 
 ## The idea
 
@@ -22,9 +22,24 @@ Next.js · React · TypeScript · Tailwind CSS · NestJS · Temporal · FastAPI 
 
 | Path | What it is |
 |---|---|
-| `index.html` | Landing page (deployed on Vercel) |
-| `docs/NidhiKavach_SIH2026_PS26265.pdf` | SIH idea deck |
-| `assets/nidhikavach_film.mp4` | 76-second concept film |
+| `apps/web` | Next.js 16 app: landing page at `/`, portal at `/app` (deployed on Vercel, functions in Mumbai) |
+| `apps/web/src/db` | Drizzle schema, migrations (`apps/web/drizzle`), seed |
+| `services/sidecar` | FastAPI sidecar on the team VM: document AI, mock bank gateway, file storage |
+| `docs/BUILD_PLAN.md` | What we are building, phase by phase |
+| `apps/web/public/docs/NidhiKavach_SIH2026_PS26265.pdf` | SIH idea deck |
+| `apps/web/public/assets/nidhikavach_film.mp4` | 76-second concept film |
+
+## Run it locally
+
+```bash
+npm install
+cp apps/web/.env.example apps/web/.env.local   # fill in the values
+npm run db:migrate
+npm run db:seed          # add -- --reset to wipe and reseed
+npm run dev              # http://localhost:3000
+```
+
+Demo accounts (one per role) are listed on the sign-in page.
 
 ## Links
 

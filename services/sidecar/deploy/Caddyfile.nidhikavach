@@ -1,0 +1,8 @@
+# NidhiKavach sidecar. Separate site block: the VPN site above is untouched.
+nidhikavach.172-198-62-117.sslip.io {
+	encode gzip
+	request_body {
+		max_size 12MB
+	}
+	reverse_proxy 127.0.0.1:8300
+}

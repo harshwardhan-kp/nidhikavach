@@ -460,9 +460,9 @@ export function generate(ctx: GenContext, seed = 26265): Dataset {
       ds.documents.push({
         instrumentId: id,
         kind: l.replaces ? "renewal_scan" : "fdr_scan",
-        fileKey: `specimen/${l.caseNo}.png`,
-        filename: `${l.caseNo}_scan.png`,
-        mime: "image/png",
+        fileKey: `specimen/${l.caseNo}.jpg`,
+        filename: `${l.caseNo}_scan.jpg`,
+        mime: "image/jpeg",
         sizeBytes: 0,
         sha256: "",
         uploadedBy: l.inst.id === demo.id ? ctx.users.institution : null,

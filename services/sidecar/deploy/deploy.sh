@@ -10,6 +10,8 @@ rsync -az --delete --exclude .venv --exclude __pycache__ --exclude .env "$HERE/"
 
 ssh "$HOST" 'bash -s' <<'REMOTE'
 set -euo pipefail
+# Fonts for rendering synthetic scans (the VM has none by default).
+dpkg -s fonts-dejavu-core fonts-liberation2 >/dev/null 2>&1 || { sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq fonts-dejavu-core fonts-liberation2 >/dev/null 2>&1 || true; }
 id nidhikavach >/dev/null 2>&1 || sudo useradd --system --home /opt/nidhikavach --shell /usr/sbin/nologin nidhikavach
 sudo mkdir -p /opt/nidhikavach/sidecar /var/lib/nidhikavach/files /etc/nidhikavach
 sudo rsync -a --delete --exclude .venv /tmp/nk-sidecar/ /opt/nidhikavach/sidecar/

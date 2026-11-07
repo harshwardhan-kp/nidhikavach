@@ -2,7 +2,7 @@
 nidhikavach.172-198-62-117.sslip.io {
 	encode gzip
 	request_body {
-		max_size 12MB
+		max_size 11MB
 	}
 	reverse_proxy 127.0.0.1:8300
 }

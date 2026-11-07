@@ -9,6 +9,10 @@ export type NextActionInput = {
   releaseStatus: string;
   maturityDate: string | null;
   openDiscrepancies: number;
+  /** Of the open ones, how many a maker has resolved and a checker must close. */
+  discrepanciesAwaitingCheck?: number;
+  /** A bank letter has been recorded and waits for a second officer. */
+  letterAwaitingCheck?: boolean;
   today: string;
 };
 
@@ -22,11 +26,16 @@ export function nextAction(i: NextActionInput): NextAction {
   if (i.releaseStatus === "recommended") return { text: "Check the release recommendation", role: "checker", due: soon(3) };
   if (i.releaseStatus === "checked") return { text: "Decide the release and eSign the order", role: "authority", due: soon(3) };
   if (["approved", "released", "refunded"].includes(i.releaseStatus)) return null;
-  if (i.openDiscrepancies > 0) return { text: "Resolve the open discrepancy", role: "maker", due: soon(7) };
+  const awaitingCheck = i.discrepanciesAwaitingCheck ?? 0;
+  if (i.openDiscrepancies > awaitingCheck) return { text: "Resolve the open discrepancy", role: "maker", due: soon(7) };
+  if (awaitingCheck > 0) return { text: "Check and close the resolved discrepancy", role: "checker", due: soon(3) };
+  if (i.letterAwaitingCheck) return { text: "Confirm the bank's letter", role: "checker", due: soon(3) };
   if (i.recordStatus === "submitted") return { text: "Start scrutiny of the new submission", role: "maker", due: soon(3) };
   if (i.verificationStatus === "unverified") return { text: "Request bank confirmation", role: "maker", due: soon(3) };
   if (i.verificationStatus === "pending_bank") return { text: "Await bank confirmation (follow up if late)", role: "maker", due: soon(7) };
   if (i.verificationStatus === "mismatch") return { text: "Raise a discrepancy on the bank mismatch", role: "maker", due: soon(2) };
+  if (i.recordStatus === "under_scrutiny" && ["bank_confirmed", "manual_confirmed"].includes(i.verificationStatus))
+    return { text: "Accept the record into the registry", role: "maker", due: soon(3) };
   if (i.renewalStatus === "overdue") return { text: "Escalate: renewed FDR not received after maturity", role: "checker", due: soon(2) };
   if (i.renewalStatus === "due" && i.maturityDate)
     return { text: "Submit the renewed / replacement FDR", role: "institution", due: i.maturityDate };

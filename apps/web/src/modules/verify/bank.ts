@@ -127,10 +127,22 @@ export async function requestBankConfirmation(instrumentId: string, actor: Actor
 
 /** Bank-letter path, step 1 (maker): record what the letter says. Applied only after a checker confirms. */
 export async function recordBankLetter(instrumentId: string, actor: Actor, letter: Record<FieldKey, string>, documentId: string) {
-  const [v] = await db
-    .insert(schema.verifications)
-    .values({ instrumentId, method: "bank_letter", status: "running", request: { documentId }, response: { letter }, requestedBy: actor.id })
-    .returning({ id: schema.verifications.id });
+  // Fill the open "letter needed" request if there is one, so the case shows a single letter step.
+  const open = await db
+    .select({ id: schema.verifications.id, response: schema.verifications.response })
+    .from(schema.verifications)
+    .where(and(eq(schema.verifications.instrumentId, instrumentId), eq(schema.verifications.method, "bank_letter"), eq(schema.verifications.status, "running")));
+  const waiting = open.find((o) => !(o.response as { letter?: unknown } | null)?.letter);
+  const [v] = waiting
+    ? await db
+        .update(schema.verifications)
+        .set({ request: { documentId }, response: { letter }, requestedBy: actor.id, requestedAt: new Date() })
+        .where(eq(schema.verifications.id, waiting.id))
+        .returning({ id: schema.verifications.id })
+    : await db
+        .insert(schema.verifications)
+        .values({ instrumentId, method: "bank_letter", status: "running", request: { documentId }, response: { letter }, requestedBy: actor.id })
+        .returning({ id: schema.verifications.id });
   await db.update(schema.instruments).set({ verificationStatus: "pending_bank" }).where(eq(schema.instruments.id, instrumentId));
   await appendLedger({ actor, action: "bank.letter_recorded", entity: "instrument", entityId: instrumentId, payload: { verificationId: v.id, documentId } });
   await recomputeInstrument(instrumentId, actor, "bank letter recorded");
@@ -142,7 +154,8 @@ export async function confirmBankLetter(verificationId: string, actor: Actor) {
   const [v] = await db.select().from(schema.verifications).where(eq(schema.verifications.id, verificationId));
   if (!v || v.method !== "bank_letter" || v.status !== "running") throw new Error("Nothing to confirm");
   if (v.requestedBy === actor.id) throw new Error("The officer who recorded the letter cannot also confirm it");
-  const letter = (v.response as { letter: Record<FieldKey, string> }).letter;
+  const letter = (v.response as { letter?: Record<FieldKey, string> } | null)?.letter;
+  if (!letter) throw new Error("No letter has been recorded yet");
   const declaredRows = await db.select().from(schema.instrumentFields).where(eq(schema.instrumentFields.instrumentId, v.instrumentId));
   const result = verdict(new Map(declaredRows.map((r) => [r.field, r.declaredValue])), letter, "ACTIVE");
   await applyBank(v.instrumentId, letter, "bank_letter");

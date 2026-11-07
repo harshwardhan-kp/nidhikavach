@@ -85,7 +85,7 @@ export async function recomputeInstrument(instrumentId: string, actor: Actor, re
   }
 
   const open = await db
-    .select({ kind: schema.discrepancies.kind, field: schema.discrepancies.field })
+    .select({ kind: schema.discrepancies.kind, field: schema.discrepancies.field, status: schema.discrepancies.status })
     .from(schema.discrepancies)
     .where(and(eq(schema.discrepancies.instrumentId, instrumentId), notInArray(schema.discrepancies.status, ["closed", "dismissed"])));
   const has = new Set(open.map((o) => `${o.kind}|${o.field ?? ""}`));
@@ -107,6 +107,10 @@ export async function recomputeInstrument(instrumentId: string, actor: Actor, re
   const lienKnown = lienValues.length ? lienValues.every(isAicteLien) : i.lienHolder ? isAicteLien(i.lienHolder) : null;
   const validity = ["renewed", "replaced"].includes(i.renewalStatus) ? i.validityStatus : validityLane({ maturityDate: i.maturityDate, today: todayIso, lienIsAicte: lienKnown });
   const renewal = renewalLane({ current: i.renewalStatus, release: i.releaseStatus, maturityDate: i.maturityDate, today: todayIso });
+  const letters = await db
+    .select({ response: schema.verifications.response })
+    .from(schema.verifications)
+    .where(and(eq(schema.verifications.instrumentId, instrumentId), eq(schema.verifications.method, "bank_letter"), eq(schema.verifications.status, "running")));
   const na = nextAction({
     recordStatus: i.recordStatus,
     verificationStatus: i.verificationStatus,
@@ -115,6 +119,8 @@ export async function recomputeInstrument(instrumentId: string, actor: Actor, re
     releaseStatus: i.releaseStatus,
     maturityDate: i.maturityDate,
     openDiscrepancies: openCount,
+    discrepanciesAwaitingCheck: open.filter((o) => o.status === "resolved_pending_check").length,
+    letterAwaitingCheck: letters.some((l) => !!(l.response as { letter?: unknown } | null)?.letter),
     today: todayIso,
   });
   const owner = na ? await ownerFor(na.role, row.regionId, i.institutionId) : null;

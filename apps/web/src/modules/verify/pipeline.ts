@@ -2,40 +2,14 @@ import "server-only";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { appendLedger } from "@/lib/ledger";
-import { compare, FIELDS, type FieldKey } from "@/lib/rules/fields";
+import { FIELDS } from "@/lib/rules/fields";
 import { signedGetUrl, tamperScan, type TamperFinding } from "@/lib/sidecar";
-import { analyzeLayout, fieldsFromDi, type Reading } from "./di";
+import { analyzeLayout, fieldsFromDi } from "./di";
+import { reconcile } from "./reconcile";
 import { recomputeInstrument } from "./recompute";
-import { tamperOpinion, visionRead, type TamperOpinion, type VisionRead } from "./vision";
+import { tamperOpinion, visionRead, type TamperOpinion } from "./vision";
 
 type Actor = { id: string; primaryRole: string };
-
-export type Reconciled = { value: string | null; confidence: number; source: "di+llm" | "di" | "llm" | null; agree: boolean | null; di: string | null; llm: string | null };
-
-/** A1: two independent readers; agreement raises confidence, disagreement flags the field. */
-export function reconcile(di: Partial<Record<FieldKey, Reading>>, llm: VisionRead | null): Record<FieldKey, Reconciled> {
-  const out = {} as Record<FieldKey, Reconciled>;
-  for (const f of FIELDS) {
-    const a = di[f.key];
-    const b = llm?.fields[f.key];
-    const av = a?.value?.trim() || null;
-    const bv = b?.value?.trim() || null;
-    if (av && bv) {
-      const c = compare(f.key, av, bv);
-      if (c !== "mismatch") {
-        out[f.key] = { value: av, confidence: Math.min(0.99, Math.max(a!.confidence, b!.confidence) + 0.05), source: "di+llm", agree: true, di: av, llm: bv };
-      } else {
-        const pick = (b!.confidence ?? 0) > (a!.confidence ?? 0) ? bv : av;
-        out[f.key] = { value: pick, confidence: 0.4, source: pick === av ? "di" : "llm", agree: false, di: av, llm: bv };
-      }
-    } else if (av || bv) {
-      out[f.key] = { value: av ?? bv, confidence: Math.round((av ? a!.confidence : b!.confidence) * 0.8 * 100) / 100, source: av ? "di" : "llm", agree: null, di: av, llm: bv };
-    } else {
-      out[f.key] = { value: null, confidence: 0, source: null, agree: null, di: null, llm: null };
-    }
-  }
-  return out;
-}
 
 /**
  * Reads and inspects the latest scan of an instrument: Document Intelligence
@@ -76,7 +50,9 @@ export async function readScan(instrumentId: string, actor: Actor) {
   const heuristic = tamperRes.status === "fulfilled" ? tamperRes.value.h : { score: 0, findings: [] as TamperFinding[], heatmapKey: null, mime: doc.mime };
   const opinion: TamperOpinion | null = tamperRes.status === "fulfilled" ? tamperRes.value.opinion : null;
 
-  const fields = reconcile(di, llm);
+  const current = await db.select().from(schema.instrumentFields).where(eq(schema.instrumentFields.instrumentId, instrumentId));
+  const refs = Object.fromEntries(current.map((r) => [r.field, [r.declaredValue, r.bankValue]]));
+  const fields = reconcile(di, llm, refs);
   const readersOk = diRes.status === "fulfilled" || llmRes.status === "fulfilled";
   // Combined tamper score: the measured signal leads; the model can raise or temper it a little.
   const tamperScore = Math.round(opinion ? Math.max(heuristic.score * 0.7 + opinion.score * 0.3, opinion.verdict === "likely_altered" ? 50 : 0) : heuristic.score);

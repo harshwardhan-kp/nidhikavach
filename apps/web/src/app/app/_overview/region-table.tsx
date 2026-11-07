@@ -36,7 +36,7 @@ export function RegionTable({ rows }: { rows: RegionRow[] }) {
                 </Link>
               </td>
               <td className="px-3 py-2 text-right">{r.active.toLocaleString("en-IN")}</td>
-              <td className="px-3 py-2 text-right">{formatCrore(Number(r.amount_paise))}</td>
+              <td className="px-3 py-2 text-right whitespace-nowrap">{formatCrore(Number(r.amount_paise))}</td>
               <td className="px-3 py-2 text-right">{r.expiring}</td>
               <td className={cn("px-3 py-2 text-right", hot(r, "overdue") && "text-red")}>{r.overdue}</td>
               <td className={cn("px-3 py-2 text-right", hot(r, "red") && "text-red")}>{r.red}</td>

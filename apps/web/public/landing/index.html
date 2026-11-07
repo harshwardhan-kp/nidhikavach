@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>nidhikavach — every deposit, released right</title>
-<meta name="description" content="NidhiKavach: a secure AICTE portal for security deposits and FDRs — bank-confirmed, deadline-aware, fully auditable. SIH26265 · Team AIT_G_SPARK.">
+<meta name="description" content="NidhiKavach: a working AICTE portal for security deposits and FDRs: two readers on every scan, bank confirmation, T-90 to T-7 reminders, three-officer eSigned release, a tamper-evident ledger. SIH26265 · Team AIT_G_SPARK.">
 <meta property="og:title" content="nidhikavach — every deposit, released right">
 <meta property="og:description" content="Security deposit & FDR lifecycle portal for AICTE. SIH26265.">
 <meta property="og:image" content="/assets/poster.jpg">
@@ -58,26 +58,47 @@ video{width:100%;border-radius:14px;display:block;background:#0E0E0E;margin-top:
 .st .c{width:60px;height:60px;border-radius:50%;border:1px solid #CFCFCD;background:var(--bg);margin:0 auto;display:grid;place-items:center;position:relative;font-family:M;font-size:13px}
 .st b{display:block;margin-top:12px;font-weight:600}
 .st span{font-family:M;font-size:11px;color:var(--mut)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:40px}
+.card{background:#F7F7F6;border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column}
+.card b{font-weight:600;font-size:16px;letter-spacing:-.2px}
+.card p{color:var(--txt);margin-top:8px;line-height:1.5;font-size:14px;flex:1}
+.pill{align-self:flex-start;margin-top:14px;font-family:M;font-size:11px;padding:3px 9px;border-radius:20px}
+.pill.real{background:#E2F0E6;color:#1E7A43}.pill.sim{background:#F7EBD6;color:#9A6200}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);margin-top:44px;border-top:1px solid var(--line)}
+.nums>div{padding:22px 22px 0 0}.nums>div+div{border-left:1px dashed #C9C9C7;padding-left:22px}
+.nums b{font-family:I,serif;font-weight:400;font-size:40px;display:block;line-height:1}
+.nums span{font-family:M;font-size:12px;color:var(--txt);display:block;margin-top:8px}
+.try{display:grid;grid-template-columns:1fr 1.2fr;gap:40px;margin-top:40px;align-items:start}
+.try ol{list-style:none;counter-reset:s}
+.try li{counter-increment:s;display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed #C9C9C7;line-height:1.5;font-size:15px}
+.try li:before{content:counter(s,decimal-leading-zero);font-family:M;font-size:13px;color:var(--red);padding-top:2px}
+table.cases{width:100%;border-collapse:collapse;font-size:14px}
+table.cases td{padding:11px 10px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.cases td:first-child{font-family:M;font-size:13px;white-space:nowrap}
+table.cases td:last-child{color:var(--txt)}
+.shot figcaption{font-family:M;font-size:12px;color:var(--mut);margin-top:12px;text-align:center}
 footer{border-top:1px solid var(--line);padding:40px 0 56px}
 footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 footer .mono{font-size:12px;color:var(--mut)}
-@media(max-width:760px){nav .links{display:none}.grid3{grid-template-columns:1fr}.grid3>div+div{border-left:0;padding-left:0}.steps{grid-template-columns:repeat(3,1fr);row-gap:28px}.steps:before{display:none}.an{display:none}}
+@media(max-width:960px){.grid4{grid-template-columns:repeat(2,1fr)}.try{grid-template-columns:1fr}}
+@media(max-width:760px){nav .links{display:none}.grid4,.nums{grid-template-columns:1fr}.nums>div+div{border-left:0;padding-left:0}.grid3{grid-template-columns:1fr}.grid3>div+div{border-left:0;padding-left:0}.steps{grid-template-columns:repeat(3,1fr);row-gap:28px}.steps:before{display:none}.an{display:none}}
 </style>
 </head>
 <body>
 <nav><div class="wrap">
   <a class="brand" href="/"><img src="/assets/logo.png" alt="">nidhikavach <small>[sih26265]</small></a>
-  <div class="links"><a href="/app">prototype</a><a href="#problem">problem</a><a href="#how">how it works</a><a href="#film">film</a><a href="/docs/NidhiKavach_SIH2026_PS26265.pdf">deck</a><a href="https://github.com/harshwardhan-kp/nidhikavach">github</a><a href="https://drive.google.com/drive/folders/1j3dU2e2X0FqaFsvp0iVqWVg2KX_jNwlF?usp=sharing">video folder</a></div>
+  <div class="links"><a href="/app">prototype</a><a href="#problem">problem</a><a href="#how">how it works</a><a href="#live">what's live</a><a href="#try">try it</a><a href="#film">film</a><a href="/docs/NidhiKavach_SIH2026_PS26265.pdf">deck</a><a href="https://github.com/harshwardhan-kp/nidhikavach">github</a><a href="https://drive.google.com/drive/folders/1j3dU2e2X0FqaFsvp0iVqWVg2KX_jNwlF?usp=sharing">video folder</a></div>
 </div></nav>
 
 <header class="wrap">
   <h1>every deposit,<br>released <i>right</i></h1>
   <p class="sub">A secure AICTE portal that follows each security deposit and FDR from upload to discharge — bank-confirmed, deadline-aware, fully auditable.</p>
-  <div class="tag">[working prototype · sih 2026]</div>
+  <div class="tag">[live prototype · 6 / 6 PS scenarios tested end to end]</div>
   <div class="cta"><a class="btn dark" href="/app">[open the prototype]</a><a class="btn" href="#film">[watch the film]</a><a class="btn" href="/docs/NidhiKavach_SIH2026_PS26265.pdf">[read the deck]</a><a class="btn" href="https://github.com/harshwardhan-kp/nidhikavach">[github]</a></div>
-  <div class="shot">
-    <img src="/assets/dashboard.png" alt="NidhiKavach officer dashboard concept">
-  </div>
+  <figure class="shot">
+    <img src="/assets/portal-overview.jpg" alt="The NidhiKavach overview for the competent authority: deposits by regional office and an AI-written weekly briefing" width="1440" height="900">
+    <figcaption>[the live portal · competent authority overview · synthetic data]</figcaption>
+  </figure>
 </header>
 
 <section id="problem"><div class="wrap">
@@ -96,12 +117,56 @@ footer .mono{font-size:12px;color:var(--mut)}
   <p class="sub" style="margin:18px 0 0;text-align:left">Every FDR field is checked three ways — what the institution declared, what the scan shows, what the bank confirms — and rolled into one trust score. Maker ≠ checker approvals and a hash-chained audit trail make fraud visible, not just recorded.</p>
   <div class="steps">
     <div class="st"><div class="c">01</div><b>submit</b><span>[institution]</span></div>
-    <div class="st"><div class="c">02</div><b>scan</b><span>[doc-ai reads]</span></div>
+    <div class="st"><div class="c">02</div><b>scan</b><span>[two ai readers]</span></div>
     <div class="st"><div class="c">03</div><b>match</b><span>[3 sources]</span></div>
-    <div class="st"><div class="c">04</div><b>verify</b><span>[maker + checker]</span></div>
+    <div class="st"><div class="c">04</div><b>verify</b><span>[bank + 2nd officer]</span></div>
     <div class="st"><div class="c">05</div><b>watch</b><span>[t-90 → t-7]</span></div>
-    <div class="st"><div class="c">06</div><b>release</b><span>[esigned]</span></div>
+    <div class="st"><div class="c">06</div><b>release</b><span>[3 officers · esigned]</span></div>
   </div>
+</div></section>
+
+<section id="live"><div class="wrap">
+  <div class="kick">what's live</div>
+  <h2>built, tested, <i>running</i></h2>
+  <p class="sub" style="margin:18px 0 0;text-align:left">Everything below works in the prototype today. Where a government system sits behind it (bank rails, eSign, email), we simulate it behind the same interface and say so on screen.</p>
+  <div class="nums">
+    <div><b>~8,650</b><span>[synthetic fdrs on 1,498 real bank branches]</span></div>
+    <div><b>6 / 6</b><span>[ps scenarios passing as browser tests]</span></div>
+    <div><b>~10 s</b><span>[to read a scan with two independent readers]</span></div>
+    <div><b>10</b><span>[ai assists · ai advises, officers decide]</span></div>
+  </div>
+  <div class="grid4">
+    <div class="card"><b>Two readers on every scan</b><p>Azure Document Intelligence and gpt-6.1-terra read each FDR independently; where they disagree, the field is flagged instead of guessed.</p><span class="pill real">[real]</span></div>
+    <div class="card"><b>Pasted amounts get caught</b><p>A compression check finds the region that was edited after the scan was saved, draws a box on it and shows a heatmap; the model gives a second opinion.</p><span class="pill real">[real]</span></div>
+    <div class="card"><b>The bank answers in seconds</b><p>Account Aggregator and NeSL-shaped confirmation; banks off the network send a letter that a second officer must confirm.</p><span class="pill sim">[simulated rails]</span></div>
+    <div class="card"><b>No maturity goes unwatched</b><p>A daily pass re-derives every deposit's status, sends T-90 / 60 / 30 / 7 reminders and escalates overdue renewals one level a week.</p><span class="pill real">[real]</span></div>
+    <div class="card"><b>Three officers, one eSign</b><p>Clause 6.46 checklist from the record; recommend, check and approve by three different people; a signed order with a QR anyone can verify.</p><span class="pill sim">[esign simulated]</span></div>
+    <div class="card"><b>A ledger you cannot rewrite</b><p>Every action is hash-chained. The database refuses edits, and a changed entry would break every hash after it.</p><span class="pill real">[real]</span></div>
+    <div class="card"><b>Ask, in plain words</b><p>"Bank mismatches above 20 lakh" becomes filters; any case can be questioned; the handbook assistant answers with clause numbers.</p><span class="pill real">[real]</span></div>
+    <div class="card"><b>English and हिन्दी</b><p>The institution's screens and officers' letters switch to Hindi; reports export to CSV and PDF; every export is logged.</p><span class="pill real">[real]</span></div>
+  </div>
+</div></section>
+
+<section id="try"><div class="wrap">
+  <div class="kick">try it</div>
+  <h2>see it work in <i>two minutes</i></h2>
+  <div class="try">
+    <ol>
+      <li><span>Open the prototype and sign in with one click as any of six roles: institution, dealing officer, regional officer, competent authority, auditor or admin.</span></li>
+      <li><span>Use the role switcher in the top bar to follow one case from desk to desk.</span></li>
+      <li><span>As admin, move the demo clock forward and watch reminders and escalations arrive.</span></li>
+      <li><span>Follow the full pitch script in <a href="https://github.com/harshwardhan-kp/nidhikavach/blob/prototype/docs/DEMO.md" style="text-decoration:underline">docs/DEMO.md</a>.</span></li>
+    </ol>
+    <table class="cases">
+      <tr><td>FDR-26-03952</td><td>A ₹25 lakh amount pasted onto a ₹2.5 lakh receipt: read the scan, see the box</td></tr>
+      <tr><td>FDR-26-05811</td><td>The bank has no record of this FDR</td></tr>
+      <tr><td>FDR-26-04187</td><td>Matures soon: move the clock and watch the reminders</td></tr>
+      <tr><td>FDR-26-05402</td><td>A renewal waiting to be verified; accepting it closes FDR-23-11820</td></tr>
+      <tr><td>FDR-16-03310</td><td>Ten-year hold complete: the institution requests release</td></tr>
+      <tr><td>FDR-16-07734</td><td>Release checked and waiting for the authority's eSign</td></tr>
+    </table>
+  </div>
+  <div class="cta" style="justify-content:flex-start;margin-top:32px"><a class="btn dark" href="/app">[open the prototype]</a><a class="btn" href="https://github.com/harshwardhan-kp/nidhikavach">[read the code]</a></div>
 </div></section>
 
 <section id="film"><div class="wrap">
